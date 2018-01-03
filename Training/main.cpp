@@ -733,22 +733,7 @@ void UpdatePipeline()
 	commandList->RSSetScissorRects(1, &scissorRect); // set the scissor rects
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
 
-    m_cube1.Display(device, commandList, frameIndex, &m_camera);
-    m_cube2.Display(device, commandList, frameIndex,&m_camera);
-   /* commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)
-    commandList->IASetIndexBuffer(&indexBufferView); // set the vertex buffer (using the vertex buffer view)
-
-                                                     // set cube1's constant buffer
-    commandList->SetGraphicsRootConstantBufferView(0, constantBufferUploadHeaps[frameIndex]->GetGPUVirtualAddress());
-
-
-    commandList->DrawIndexedInstanced(numCubeIndices, 1, 0, 0, 0);*/
-
-   // m_cube2.Display(device, commandList, vertexBufferView, indexBufferView, constantBufferUploadHeaps, frameIndex, numCubeIndices, ConstantBufferPerObjectAlignedSize);
-/*   commandList->SetGraphicsRootConstantBufferView(0, constantBufferUploadHeaps[frameIndex]->GetGPUVirtualAddress() + ConstantBufferPerObjectAlignedSize);
-
-
-   commandList->DrawIndexedInstanced(numCubeIndices, 2, 0, 0, 0);*/
+    m_cube1.Draw( commandList, frameIndex, &m_camera);
 
     commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
@@ -786,7 +771,7 @@ void Render()
 	}
 
 	// present the current backbuffer
-	hr = swapChain->Present(0, 0);
+    hr = swapChain->Present(0, 0);
 	if (FAILED(hr))
 	{
 		Running = false;

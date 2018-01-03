@@ -110,7 +110,7 @@ D3D12_RECT scissorRect; // the area to draw in. pixels outside that area will no
 Camera m_camera = Camera(DirectX::XMFLOAT4(0.0f, 0.0f, -4.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f));
 
 GameObject m_cube1 = GameObject(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f));
-GameObject m_cube2 = GameObject(DirectX::XMFLOAT4(4.0f, 0.0f, 0.0f, 0.0f));
+GameObject m_cube2 = GameObject(DirectX::XMFLOAT4(2.0f, 0.0f, 0.0f, 0.0f));
 
 MyMesh m_cubeMesh;
 

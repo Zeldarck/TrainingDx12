@@ -19,26 +19,22 @@ class GameObject
         ID3D12Resource** constantBufferUploadHeaps;
         UINT8** cbvGPUAddress;
         MyMesh* m_mesh;
+        GameObject* m_parent;
 
         void Rotate(float a_x, float a_y, float a_z, float a_value);
         void Translate(float a_x, float a_y, float a_z);
         void Scale(float a_x, float a_y, float a_z);
         void SetParent(GameObject* a_parent);
         void AddChildren(GameObject* a_child);
-        void Display(ID3D12Device * device, ID3D12GraphicsCommandList * commandList, int frameIndex, Camera * camera);
+        void Draw(ID3D12GraphicsCommandList * a_commandList, int a_frameIndex, Camera * a_camera, DirectX::XMMATRIX a_transformationMatrix = DirectX::XMMatrixIdentity());
 
         void CreateCBUploadHeap(ID3D12Device * device, int frameBufferCount);
 
         void SetMesh(MyMesh* a_mesh);
 
-        int ConstantBufferObjectAlignedSize = (sizeof(ConstantBufferObject) + 255) & ~255;
-        ConstantBufferObject cbObject; // this is the constant buffer data we will send to the gpu 
-                                             // (which will be placed in the resource we created above)
-
-
+        ConstantBufferObject cbObject;
 
         DirectX::XMMATRIX GetWorldMatrix();
-      //  DirectX::XMMATRIX GetVPMatrix();
 
 
         std::vector<GameObject*> m_children;
@@ -47,7 +43,6 @@ class GameObject
         DirectX::XMFLOAT4 m_target;
         DirectX::XMFLOAT4 m_position;
         DirectX::XMFLOAT4X4 m_transformationMatrix;
-        DirectX::XMFLOAT4X4 m_projectionMatrix;
         DirectX::XMFLOAT4X4 m_viewMatrix;
 
 
