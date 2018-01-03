@@ -495,21 +495,11 @@ bool InitD3D()
 	}
 
 
-
-    ///////////////////////////
-
-  /*  objl::Loader Loader;
-
-    // Load .obj File
-    bool loadout = Loader.LoadFile("cube.obj");
-    objl::Mesh curMesh = Loader.LoadedMeshes[0];*/
-
     m_cubeMesh.SetObj("cube.obj");
+    m_TorusMesh.SetObj("Torus.obj");
 
     m_cubeMesh.PushOnGPU(device, commandList);
-
-
-    //////////////////////////////////////////////////////
+    m_TorusMesh.PushOnGPU(device, commandList);
 
 
     D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
@@ -545,12 +535,8 @@ bool InitD3D()
     device->CreateDepthStencilView(depthStencilBuffer, &depthStencilDesc, dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
 
-    //////////////////////////////////
-
-    m_cube1.CreateCBUploadHeap(device, frameBufferCount);
-    m_cube2.CreateCBUploadHeap(device, frameBufferCount);
-
-    ///////////////////////////////////
+    m_gameObject1.CreateCBUploadHeap(device, frameBufferCount);
+    m_gameObject2.CreateCBUploadHeap(device, frameBufferCount);
 
 
 	// Now we execute the command list to upload the initial assets (triangle data)
@@ -588,12 +574,12 @@ bool InitD3D()
     m_camera.SetFOV(45.0f);
     m_camera.SetView(Width, Height);
 
-    m_cube2.Scale(0.4f, 0.5f, 1.0f);
-    m_cube2.SetParent(&m_cube1);
+    //m_gameObject2.Scale(0.4f, 0.5f, 1.0f);
+    m_gameObject2.SetParent(&m_gameObject1);
 
 
-    m_cube1.SetMesh(&m_cubeMesh);
-    m_cube2.SetMesh(&m_cubeMesh);
+    m_gameObject1.SetMesh(&m_cubeMesh);
+    m_gameObject2.SetMesh(&m_TorusMesh);
 }
 
 void UpdateCamera() {
@@ -653,30 +639,14 @@ void Update()
 
     UpdateCamera();
 
-    if (GetAsyncKeyState(VK_LBUTTON)) {
-        return;
-    }
 
-   m_cube1.Rotate(0.0f, 0.0f, 1.0f, 0.0001f);
-    m_cube1.Rotate(0.0f, 1.0f, 0.0f, 0.0002f);
-    m_cube1.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);
+    m_gameObject1.Rotate(0.0f, 0.0f, 1.0f, 0.0001f);
+    m_gameObject1.Rotate(0.0f, 1.0f, 0.0f, 0.0002f);
+    m_gameObject1.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);
 
-
-
-
-    m_cube2.Rotate(0.0f, 0.0f, 1.0f, 0.0001f);
-    m_cube2.Rotate(0.0f, 1.0f, 0.0f, 0.0002f);
-    m_cube2.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);
-
-
-   /* wvpMat = m_cube2.GetWorldMatrix() *  m_camera.GetVPMatrix(); // create wvp matrix
-    transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
-    XMStoreFloat4x4(&cbPerObject.wvpMat, transposed); // store transposed wvp matrix in constant buffer
-
-
-
-    memcpy(cbvGPUAddress[frameIndex] + ConstantBufferPerObjectAlignedSize, &cbPerObject, sizeof(cbPerObject));*/
-    
+    m_gameObject2.Rotate(0.0f, 0.0f, 1.0f, 0.0001f);
+    m_gameObject2.Rotate(0.0f, 1.0f, 0.0f, 0.0002f);
+    m_gameObject2.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);   
 }
 
 void UpdatePipeline()
@@ -733,11 +703,26 @@ void UpdatePipeline()
 	commandList->RSSetScissorRects(1, &scissorRect); // set the scissor rects
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
 
-    m_cube1.Draw( commandList, frameIndex, &m_camera);
+    m_gameObject1.Draw( commandList, frameIndex, &m_camera);
 
     commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 
+    //Not good way? Don't use device in that?
+    if (GetAsyncKeyState(VK_LBUTTON) && !add_stickMan) {
+        MyMesh* sphere = new MyMesh();
+        GameObject* go = new GameObject(DirectX::XMFLOAT4(-1.0f,0.0f,0.0f,0.0f));
+        go->SetParent(&m_gameObject2);
+        sphere->SetObj("sphere.obj");
+
+        sphere->PushOnGPU(device, commandList);
+
+        go->SetMesh(sphere);
+        go->CreateCBUploadHeap(device, frameBufferCount);
+        add_stickMan = true;
+    }
+
+    
 	// transition the "frameIndex" render target from the render target state to the present state. If the debug layer is enabled, you will receive a
 	// warning if present is called on the render target when it's not in the present state
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));

@@ -105,19 +105,18 @@ D3D12_VIEWPORT viewport; // area that output from rasterizer will be stretched t
 D3D12_RECT scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
 
 
-
-
 Camera m_camera = Camera(DirectX::XMFLOAT4(0.0f, 0.0f, -4.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f));
 
-GameObject m_cube1 = GameObject(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f));
-GameObject m_cube2 = GameObject(DirectX::XMFLOAT4(2.0f, 0.0f, 0.0f, 0.0f));
+GameObject m_gameObject1 = GameObject(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f));
+GameObject m_gameObject2 = GameObject(DirectX::XMFLOAT4(2.0f, 0.0f, 0.0f, 0.0f));
 
 MyMesh m_cubeMesh;
+MyMesh m_TorusMesh;
 
 ID3D12Resource* depthStencilBuffer; // This is the memory for our depth buffer. it will also be used for a stencil buffer in a later tutorial
 ID3D12DescriptorHeap* dsDescriptorHeap; // This is a heap for our depth/stencil buffer descriptor
 float speed = 0.0001f;
 
-bool add_cube = false;
+bool add_stickMan = false;
 
 
