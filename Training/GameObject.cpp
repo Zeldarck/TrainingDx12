@@ -29,15 +29,8 @@ void GameObject::AddChildren(GameObject * a_child)
     m_children.push_back(a_child);
 }
 
-void GameObject::SetObj(std::string a_obj)
-{
-    objl::Loader Loader;
 
-    bool loadout = Loader.LoadFile(a_obj);
-    m_mesh = &Loader.LoadedMeshes[0];
-}
-
-void GameObject::Display(ID3D12Device * device, ID3D12GraphicsCommandList * commandList,int frameIndex,int numCubeIndices, Camera* camera)
+void GameObject::Display(ID3D12Device * device, ID3D12GraphicsCommandList * commandList,int frameIndex, Camera* camera)
 {
 
     DirectX::XMMATRIX wvpMat = GetWorldMatrix() *  camera->GetVPMatrix(); // create wvp matrix
@@ -48,29 +41,16 @@ void GameObject::Display(ID3D12Device * device, ID3D12GraphicsCommandList * comm
 
 
 
-    commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)
-    commandList->IASetIndexBuffer(&indexBufferView); // set the vertex buffer (using the vertex buffer view)
+    commandList->IASetVertexBuffers(0, 1, m_mesh->GetVertexBufferView()); // set the vertex buffer (using the vertex buffer view)
+    commandList->IASetIndexBuffer(m_mesh->GetIndexBufferView()); // set the vertex buffer (using the vertex buffer view)
 
                                                      // set cube1's constant buffer
     commandList->SetGraphicsRootConstantBufferView(0, constantBufferUploadHeaps[frameIndex]->GetGPUVirtualAddress());
 
-    commandList->DrawIndexedInstanced(numCubeIndices, 1, 0, 0, 0);
+    commandList->DrawIndexedInstanced(m_mesh->GetCountIndex(), 1, 0, 0, 0);
 
 }
 
-void GameObject::SetBufferVertexView(ID3D12Resource * vertexBuffer, int vBufferSize)
-{
-    vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-    vertexBufferView.StrideInBytes = sizeof(Vertex);
-    vertexBufferView.SizeInBytes = vBufferSize;
-}
-
-void GameObject::SetBufferIndexView(ID3D12Resource * indexBuffer, int vIndexSize)
-{
-    indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-    indexBufferView.SizeInBytes = vIndexSize;
-    indexBufferView.Format = DXGI_FORMAT_R32_UINT; // 32-bit unsigned integer (this is what a dword is, double word, a word is 2 bytes)
-}
 
 void GameObject::CreateCBUploadHeap(ID3D12Device * device, int frameBufferCount)
 {
@@ -93,12 +73,14 @@ void GameObject::CreateCBUploadHeap(ID3D12Device * device, int frameBufferCount)
 
         hr = constantBufferUploadHeaps[i]->Map(0, &readRange, reinterpret_cast<void**>(&cbvGPUAddress[i]));
 
-        // Because of the constant read alignment requirements, constant buffer views must be 256 bit aligned. Our buffers are smaller than 256 bits,
-        // so we need to add spacing between the two buffers, so that the second buffer starts at 256 bits from the beginning of the resource heap.
-        memcpy(cbvGPUAddress[i], &cbObject, sizeof(cbObject)); // cube1's constant buffer data
-       // memcpy(cbvGPUAddress[i] + ConstantBufferObjectAlignedSize, &cbPerObject, sizeof(cbPerObject)); // cube2's constant buffer data
+        memcpy(cbvGPUAddress[i], &cbObject, sizeof(cbObject)); 
     }
 
+}
+
+void GameObject::SetMesh(MyMesh* a_mesh)
+{
+    m_mesh = a_mesh;
 }
 
 /*DirectX::XMMATRIX GameObject::GetVPMatrix()

@@ -157,11 +157,13 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MyMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="MyMesh.h" />
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
