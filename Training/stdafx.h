@@ -106,14 +106,8 @@ D3D12_RECT scissorRect; // the area to draw in. pixels outside that area will no
 ID3D12Resource* vertexBuffer; // a default buffer in GPU memory that we will load vertex data for our triangle into
 ID3D12Resource* indexBuffer; // a default buffer in GPU memory that we will load vertex data for our triangle into
 
-D3D12_VERTEX_BUFFER_VIEW vertexBufferView; // a structure containing a pointer to the vertex data in gpu memory
-D3D12_INDEX_BUFFER_VIEW indexBufferView; // a structure containing a pointer to the vertex data in gpu memory
-										   // the total size of the buffer, and the size of each element (vertex)
 
                                            // this is the structure of our constant buffer.
-struct ConstantBufferPerObject {
-    DirectX::XMFLOAT4X4 wvpMat;
-};
 
 // Constant buffers must be 256-byte aligned which has to do with constant reads on the GPU.
 // We are only able to read at 256 byte intervals from the start of a resource heap, so we will
@@ -124,14 +118,8 @@ struct ConstantBufferPerObject {
 // buffer data to the gpu virtual address. currently we memcpy the size of our structure, which is 16 bytes here, but if we
 // were to add the padding array, we would memcpy 64 bytes if we memcpy the size of our structure, which is 50 wasted bytes
 // being copied.
-int ConstantBufferPerObjectAlignedSize = (sizeof(ConstantBufferPerObject) + 255) & ~255;
 
-ConstantBufferPerObject cbPerObject; // this is the constant buffer data we will send to the gpu 
-                                     // (which will be placed in the resource we created above)
 
-ID3D12Resource* constantBufferUploadHeaps[frameBufferCount]; // this is the memory on the gpu where constant buffers for each frame will be placed
-
-UINT8* cbvGPUAddress[frameBufferCount]; // this is a pointer to each of the constant buffer resource heaps
 
 Camera m_camera = Camera(DirectX::XMFLOAT4(0.0f, 0.0f, -4.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f));
 

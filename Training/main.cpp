@@ -2,12 +2,6 @@
 
 //using namespace DirectX; // we will be using the directxmath library
 
-struct Vertex {
-    Vertex() : pos(0, 0, 0), color(0, 0, 0, 0) {};
-	Vertex(float x, float y, float z, float r, float g, float b, float a) : pos(x, y, z), color(r, g, b, z) {}
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT4 color;
-};
 
 int WINAPI WinMain(HINSTANCE hInstance,    //Main windows function
 	HINSTANCE hPrevInstance,
@@ -661,31 +655,8 @@ bool InitD3D()
 
     //////////////////////////////////
 
-    for (int i = 0; i < frameBufferCount; ++i)
-    {
-        // create resource for cube 1
-        hr = device->CreateCommittedResource(
-            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // this heap will be used to upload the constant buffer data
-            D3D12_HEAP_FLAG_NONE, // no flags
-            &CD3DX12_RESOURCE_DESC::Buffer(1024 * 64), // size of the resource heap. Must be a multiple of 64KB for single-textures and constant buffers
-            D3D12_RESOURCE_STATE_GENERIC_READ, // will be data that is read from so we keep it in the generic read state
-            nullptr, // we do not have use an optimized clear value for constant buffers
-            IID_PPV_ARGS(&constantBufferUploadHeaps[i]));
-        constantBufferUploadHeaps[i]->SetName(L"Constant Buffer Upload Resource Heap");
-
-        ZeroMemory(&cbPerObject, sizeof(cbPerObject));
-
-        CD3DX12_RANGE readRange(0, 0);	// We do not intend to read from this resource on the CPU. (so end is less than or equal to begin)
-
-                                        // map the resource heap to get a gpu virtual address to the beginning of the heap
-        hr = constantBufferUploadHeaps[i]->Map(0, &readRange, reinterpret_cast<void**>(&cbvGPUAddress[i]));
-
-        // Because of the constant read alignment requirements, constant buffer views must be 256 bit aligned. Our buffers are smaller than 256 bits,
-        // so we need to add spacing between the two buffers, so that the second buffer starts at 256 bits from the beginning of the resource heap.
-        memcpy(cbvGPUAddress[i], &cbPerObject, sizeof(cbPerObject)); // cube1's constant buffer data
-        memcpy(cbvGPUAddress[i] + ConstantBufferPerObjectAlignedSize, &cbPerObject, sizeof(cbPerObject)); // cube2's constant buffer data
-    }
-
+    m_cube1.CreateCBUploadHeap(device, frameBufferCount);
+    m_cube2.CreateCBUploadHeap(device, frameBufferCount);
 
     ///////////////////////////////////
 
@@ -703,18 +674,17 @@ bool InitD3D()
 		Running = false;
 	}
 
-	// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
-	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-	vertexBufferView.StrideInBytes = sizeof(Vertex);
-	vertexBufferView.SizeInBytes = vBufferSize;
-
-    // create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
-    indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-    indexBufferView.SizeInBytes = vIndexSize;
-    indexBufferView.Format = DXGI_FORMAT_R32_UINT; // 32-bit unsigned integer (this is what a dword is, double word, a word is 2 bytes)
+    /////////////
 
 
+    m_cube1.SetBufferVertexView(vertexBuffer,vBufferSize);
+    m_cube1.SetBufferIndexView(indexBuffer, vIndexSize);
 
+
+    m_cube2.SetBufferVertexView(vertexBuffer, vBufferSize);
+    m_cube2.SetBufferIndexView(indexBuffer, vIndexSize);
+    //////////////////////////
+    
 	// Fill out the Viewport
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
@@ -807,24 +777,20 @@ void Update()
     m_cube1.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);
 
 
-    DirectX::XMMATRIX wvpMat = m_cube1.GetWorldMatrix() *  m_camera.GetVPMatrix(); // create wvp matrix
-    DirectX::XMMATRIX transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
-    XMStoreFloat4x4(&cbPerObject.wvpMat, transposed); // store transposed wvp matrix in constant buffer
 
-    memcpy(cbvGPUAddress[frameIndex], &cbPerObject, sizeof(cbPerObject));
 
     m_cube2.Rotate(0.0f, 0.0f, 1.0f, 0.0001f);
     m_cube2.Rotate(0.0f, 1.0f, 0.0f, 0.0002f);
     m_cube2.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);
 
 
-    wvpMat = m_cube2.GetWorldMatrix() *  m_camera.GetVPMatrix(); // create wvp matrix
+   /* wvpMat = m_cube2.GetWorldMatrix() *  m_camera.GetVPMatrix(); // create wvp matrix
     transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
     XMStoreFloat4x4(&cbPerObject.wvpMat, transposed); // store transposed wvp matrix in constant buffer
 
 
 
-    memcpy(cbvGPUAddress[frameIndex] + ConstantBufferPerObjectAlignedSize, &cbPerObject, sizeof(cbPerObject));
+    memcpy(cbvGPUAddress[frameIndex] + ConstantBufferPerObjectAlignedSize, &cbPerObject, sizeof(cbPerObject));*/
     
 }
 
@@ -881,19 +847,23 @@ void UpdatePipeline()
 	commandList->RSSetViewports(1, &viewport); // set the viewports
 	commandList->RSSetScissorRects(1, &scissorRect); // set the scissor rects
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
-    commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)
+
+    m_cube1.Display(device, commandList, frameIndex, numCubeIndices, &m_camera);
+    m_cube2.Display(device, commandList, frameIndex, numCubeIndices,&m_camera);
+   /* commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)
     commandList->IASetIndexBuffer(&indexBufferView); // set the vertex buffer (using the vertex buffer view)
 
                                                      // set cube1's constant buffer
     commandList->SetGraphicsRootConstantBufferView(0, constantBufferUploadHeaps[frameIndex]->GetGPUVirtualAddress());
 
 
-    commandList->DrawIndexedInstanced(numCubeIndices, 1, 0, 0, 0);
+    commandList->DrawIndexedInstanced(numCubeIndices, 1, 0, 0, 0);*/
 
-   commandList->SetGraphicsRootConstantBufferView(0, constantBufferUploadHeaps[frameIndex]->GetGPUVirtualAddress() + ConstantBufferPerObjectAlignedSize);
+   // m_cube2.Display(device, commandList, vertexBufferView, indexBufferView, constantBufferUploadHeaps, frameIndex, numCubeIndices, ConstantBufferPerObjectAlignedSize);
+/*   commandList->SetGraphicsRootConstantBufferView(0, constantBufferUploadHeaps[frameIndex]->GetGPUVirtualAddress() + ConstantBufferPerObjectAlignedSize);
 
 
-   commandList->DrawIndexedInstanced(numCubeIndices, 2, 0, 0, 0);
+   commandList->DrawIndexedInstanced(numCubeIndices, 2, 0, 0, 0);*/
 
     commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
