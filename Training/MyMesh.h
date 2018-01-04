@@ -17,6 +17,7 @@ class MyMesh
         objl::Mesh m_mesh;
         std::vector<MyMesh*> m_children;
 
+        std::vector<MyMesh*> getChildren();
         ID3D12Resource* vertexBuffer;
         ID3D12Resource* indexBuffer;
         D3D12_VERTEX_BUFFER_VIEW vertexBufferView;

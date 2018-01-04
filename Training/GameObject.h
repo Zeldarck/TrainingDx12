@@ -16,10 +16,12 @@ class GameObject
 {
 
     public:
+        ID3D12Device * m_device;
         ID3D12Resource** constantBufferUploadHeaps;
         UINT8** cbvGPUAddress;
         MyMesh* m_mesh = nullptr;
         GameObject* m_parent = nullptr;
+        int m_frameBufferCount = 0;
 
         void Rotate(float a_x, float a_y, float a_z, float a_value);
         void Translate(float a_x, float a_y, float a_z);

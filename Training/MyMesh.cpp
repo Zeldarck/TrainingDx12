@@ -1,6 +1,11 @@
 #include "MyMesh.h"
 
 
+std::vector<MyMesh*> MyMesh::getChildren()
+{
+    return m_children;
+}
+
 D3D12_VERTEX_BUFFER_VIEW * MyMesh::GetVertexBufferView()
 {
     return &vertexBufferView;
@@ -29,9 +34,9 @@ void MyMesh::Draw(ID3D12GraphicsCommandList * a_commandList) {
 
 
     a_commandList->DrawIndexedInstanced(GetCountIndex(), 1, 0, 0, 0);
-    for (MyMesh* a_mesh : m_children) {
+    /*for (MyMesh* a_mesh : m_children) {
         a_mesh->Draw(a_commandList);
-    }
+    }*/
 
 }
 

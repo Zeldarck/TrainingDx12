@@ -84,12 +84,20 @@ void GameObject::CreateCBUploadHeap(ID3D12Device * device, int frameBufferCount)
 
         memcpy(cbvGPUAddress[i], &cbObject, sizeof(cbObject)); 
     }
+    m_device = device;
+    m_frameBufferCount = frameBufferCount;
 
 }
 
 void GameObject::SetMesh(MyMesh* a_mesh)
 {
     m_mesh = a_mesh;
+    for (MyMesh* mesh : a_mesh->getChildren()) {
+        GameObject* go = new GameObject();
+        go->SetMesh(mesh);
+        go->CreateCBUploadHeap(m_device, m_frameBufferCount);
+        this->AddChildren(go);
+    }
 }
 
 
@@ -107,14 +115,12 @@ DirectX::XMMATRIX GameObject::GetWorldMatrix() {
 }
 
 
-GameObject::GameObject()
+GameObject::GameObject() : GameObject::GameObject(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f))
 {
-    DirectX::XMStoreFloat4x4(&m_transformationMatrix, DirectX::XMMatrixIdentity());
 }
 
 GameObject::GameObject(DirectX::XMFLOAT4 a_position) : GameObject(a_position, DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f))
 {
-    DirectX::XMStoreFloat4x4(&m_transformationMatrix, DirectX::XMMatrixIdentity());
 }
 
 GameObject::GameObject(DirectX::XMFLOAT4 a_position, DirectX::XMFLOAT4 a_target, DirectX::XMFLOAT4 a_up, DirectX::XMFLOAT4 a_right) 
