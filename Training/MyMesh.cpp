@@ -54,7 +54,9 @@ void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_co
 
     for (int j = 0; j < m_mesh->Vertices.size(); j++)
     {
-        vList[j] = { m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX };
+        vList[j] = { m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z
+            , (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX 
+            ,m_mesh->Vertices[j].TextureCoordinate.X,m_mesh->Vertices[j].TextureCoordinate.Y };
     }
 
     vBufferSize = sizeof(Vertex) * m_mesh->Vertices.size();

@@ -5,10 +5,12 @@
 
 
 struct Vertex {
-    Vertex() : pos(0, 0, 0), color(0, 0, 0, 0) {};
-    Vertex(float x, float y, float z, float r, float g, float b, float a) : pos(x, y, z), color(r, g, b, z) {}
+    Vertex() : pos(0, 0, 0), color(0, 0, 0, 0),texCoord(0,0) {};
+    Vertex(float x, float y, float z, float r, float g, float b, float a, float u, float v) : pos(x, y, z), color(r, g, b, z), texCoord(u,v) {}
     DirectX::XMFLOAT3 pos;
     DirectX::XMFLOAT4 color;
+    DirectX::XMFLOAT2 texCoord;
+
 };
 
 class MyMesh

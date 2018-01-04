@@ -2,12 +2,14 @@ struct VS_INPUT
 {
 	float4 pos : POSITION;
 	float4 color: COLOR;
+    float2 texCoord: TEXCOORD;
 };
 
 struct VS_OUTPUT
 {
 	float4 pos: SV_POSITION;
 	float4 color: COLOR;
+    float2 texCoord: TEXCOORD;
 };
 
 cbuffer ConstantBuffer : register(b0)
@@ -19,6 +21,7 @@ VS_OUTPUT main(VS_INPUT input)
 {
 	VS_OUTPUT output;
     output.pos = mul(input.pos, wvpMat);
-    output.color = input.color;
+   // output.color = input.color;
+    output.texCoord = input.texCoord;
 	return output;
 }
