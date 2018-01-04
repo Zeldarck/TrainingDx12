@@ -14,14 +14,23 @@ struct ConstantBufferObject {
 
 class GameObject
 {
-
-    public:
+    protected :
         ID3D12Device * m_device;
         ID3D12Resource** constantBufferUploadHeaps;
         UINT8** cbvGPUAddress;
         MyMesh* m_mesh = nullptr;
         GameObject* m_parent = nullptr;
         int m_frameBufferCount = 0;
+        ConstantBufferObject cbObject;
+        std::vector<GameObject*> m_children;
+        DirectX::XMFLOAT4 m_up;
+        DirectX::XMFLOAT4 m_right;
+        DirectX::XMFLOAT4 m_target;
+        DirectX::XMFLOAT4 m_position;
+        DirectX::XMFLOAT4X4 m_transformationMatrix;
+        DirectX::XMFLOAT4X4 m_viewMatrix;
+
+    public:
 
         void Rotate(float a_x, float a_y, float a_z, float a_value);
         void Translate(float a_x, float a_y, float a_z);
@@ -34,20 +43,13 @@ class GameObject
 
         void SetMesh(MyMesh* a_mesh);
 
-        ConstantBufferObject cbObject;
 
         DirectX::XMMATRIX GetLocalWorldMatrix();
 
         DirectX::XMMATRIX GetWorldMatrix();
 
 
-        std::vector<GameObject*> m_children;
-        DirectX::XMFLOAT4 m_up;
-        DirectX::XMFLOAT4 m_right;
-        DirectX::XMFLOAT4 m_target;
-        DirectX::XMFLOAT4 m_position;
-        DirectX::XMFLOAT4X4 m_transformationMatrix;
-        DirectX::XMFLOAT4X4 m_viewMatrix;
+    
 
 
         GameObject();

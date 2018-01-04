@@ -13,17 +13,22 @@ struct Vertex {
 
 class MyMesh
 {
-    public:
-        objl::Mesh m_mesh;
-        std::vector<MyMesh*> m_children;
-
-        std::vector<MyMesh*> getChildren();
+    protected:
         ID3D12Resource* vertexBuffer;
         ID3D12Resource* indexBuffer;
         D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
         D3D12_INDEX_BUFFER_VIEW indexBufferView;
         int vBufferSize;
         int vIndexSize;
+        objl::Mesh* m_mesh = nullptr;
+        std::vector<MyMesh*> m_children;
+        void SetBufferVertexView();
+        void SetBufferIndexView();
+
+
+
+    public:
+        std::vector<MyMesh*> getChildren();
 
         D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView();
         D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView();
@@ -31,11 +36,9 @@ class MyMesh
         void SetObj(std::string a_obj);
         void Draw(ID3D12GraphicsCommandList * a_commandList);
         void PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList);
-        void SetBufferVertexView();
-        void SetBufferIndexView();
         int GetCountIndex();
         MyMesh();
-        MyMesh(objl::Mesh a_mesh);
+        MyMesh(objl::Mesh * a_mesh);
         ~MyMesh();
 };
 

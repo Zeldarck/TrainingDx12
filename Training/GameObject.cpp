@@ -61,13 +61,13 @@ void GameObject::Draw(ID3D12GraphicsCommandList * a_commandList, int a_frameInde
 }
 
 
-void GameObject::CreateCBUploadHeap(ID3D12Device * device, int frameBufferCount)
+void GameObject::CreateCBUploadHeap(ID3D12Device * a_device, int a_frameBufferCount)
 {
-    constantBufferUploadHeaps = new ID3D12Resource*[frameBufferCount];
-    cbvGPUAddress = new UINT8*[frameBufferCount];
-    for (int i = 0; i < frameBufferCount; ++i)
+    constantBufferUploadHeaps = new ID3D12Resource*[a_frameBufferCount];
+    cbvGPUAddress = new UINT8*[a_frameBufferCount];
+    for (int i = 0; i < a_frameBufferCount; ++i)
     {
-        HRESULT hr = device->CreateCommittedResource(
+        HRESULT hr = a_device->CreateCommittedResource(
             &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 
             D3D12_HEAP_FLAG_NONE, 
             &CD3DX12_RESOURCE_DESC::Buffer(1024 * 64), 
@@ -84,8 +84,8 @@ void GameObject::CreateCBUploadHeap(ID3D12Device * device, int frameBufferCount)
 
         memcpy(cbvGPUAddress[i], &cbObject, sizeof(cbObject)); 
     }
-    m_device = device;
-    m_frameBufferCount = frameBufferCount;
+    m_device = a_device;
+    m_frameBufferCount = a_frameBufferCount;
 
 }
 

@@ -18,13 +18,17 @@ D3D12_INDEX_BUFFER_VIEW * MyMesh::GetIndexBufferView()
 
 void MyMesh::SetObj(std::string a_obj)
 {
-    objl::Loader Loader;
+    objl::Loader* Loader = new objl::Loader();
 
-    bool loadout = Loader.LoadFile(a_obj);
-    m_mesh = Loader.LoadedMeshes[0];
-    for (int i = 1; i < Loader.LoadedMeshes.size(); ++i) {
-        MyMesh* mesh =  new MyMesh(Loader.LoadedMeshes[i]);
-        m_children.push_back(mesh);
+    bool loadout = Loader->LoadFile(a_obj);
+    if (Loader->LoadedMeshes.size() > 1) {
+        for (int i = 0; i < Loader->LoadedMeshes.size(); ++i) {
+            MyMesh* mesh = new MyMesh(&Loader->LoadedMeshes[i]);
+            m_children.push_back(mesh);
+        }
+    }
+    else {
+        m_mesh = &Loader->LoadedMeshes[0];
     }
 }
 
@@ -34,30 +38,34 @@ void MyMesh::Draw(ID3D12GraphicsCommandList * a_commandList) {
 
 
     a_commandList->DrawIndexedInstanced(GetCountIndex(), 1, 0, 0, 0);
-    /*for (MyMesh* a_mesh : m_children) {
-        a_mesh->Draw(a_commandList);
-    }*/
-
 }
 
 void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList)
 {
-    Vertex *vList = new Vertex[m_mesh.Vertices.size()];
 
-    for (int j = 0; j < m_mesh.Vertices.size(); j++)
+    for (MyMesh* a_mesh : m_children) {
+        a_mesh->PushOnGPU(a_device, a_commandList);
+    }
+
+    if (!m_mesh) {
+        return;
+    }
+    Vertex *vList = new Vertex[m_mesh->Vertices.size()];
+
+    for (int j = 0; j < m_mesh->Vertices.size(); j++)
     {
-        vList[j] = { m_mesh.Vertices[j].Position.X, m_mesh.Vertices[j].Position.Y, m_mesh.Vertices[j].Position.Z, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX };
+        vList[j] = { m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX };
     }
 
-    vBufferSize = sizeof(Vertex) * m_mesh.Vertices.size();
+    vBufferSize = sizeof(Vertex) * m_mesh->Vertices.size();
 
 
-    DWORD *vIndices = new DWORD[m_mesh.Indices.size()];
-    for (int j = 0; j < m_mesh.Indices.size(); j++) {
-        vIndices[j] = m_mesh.Indices[j];
+    DWORD *vIndices = new DWORD[m_mesh->Indices.size()];
+    for (int j = 0; j < m_mesh->Indices.size(); j++) {
+        vIndices[j] = m_mesh->Indices[j];
     }
 
-    vIndexSize = sizeof(DWORD) * m_mesh.Indices.size();
+    vIndexSize = sizeof(DWORD) * m_mesh->Indices.size();
 
     a_device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
@@ -149,11 +157,6 @@ void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_co
     SetBufferVertexView();
     SetBufferIndexView();
 
-    for (MyMesh* a_mesh : m_children) {
-        a_mesh->PushOnGPU(a_device, a_commandList);
-    }
-
-
 
 }
 
@@ -175,7 +178,8 @@ void MyMesh::SetBufferIndexView()
 
 int MyMesh::GetCountIndex()
 {
-    return m_mesh.Indices.size();
+    
+    return m_mesh ? m_mesh->Indices.size() : 0;
 }
 
 
@@ -184,7 +188,7 @@ MyMesh::MyMesh()
 }
 
 
-MyMesh::MyMesh(objl::Mesh a_mesh)
+MyMesh::MyMesh(objl::Mesh* a_mesh)
 {
     m_mesh = a_mesh;
 }
