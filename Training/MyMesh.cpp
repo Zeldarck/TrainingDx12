@@ -33,9 +33,17 @@ void MyMesh::SetObj(std::string a_obj)
     }
 }
 
+bool MyMesh::HaveATexture() {
+    return m_mesh->MeshMaterial.map_Ka.size() > 0;
+}
+
 void MyMesh::Draw(ID3D12GraphicsCommandList * a_commandList) {
 
-    if (m_mesh->MeshMaterial.map_Ka.size() > 0) {
+    if (!m_mesh) {
+        return;
+    }
+
+    if (HaveATexture()) {
         // set the descriptor heap
         ID3D12DescriptorHeap* descriptorHeaps[] = { mainDescriptorHeap };
         a_commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
@@ -175,80 +183,82 @@ void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_co
 
 void MyMesh::PushTextureOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList)
 {
-    if (m_mesh->MeshMaterial.map_Ka.size() > 0) {
-
-        // Load the image from file
-        D3D12_RESOURCE_DESC textureDesc;
-        int imageBytesPerRow;
-        BYTE* imageData;
-        int imageSize = LoadImageDataFromFile(&imageData, textureDesc, L"cube.jpg", imageBytesPerRow);
-
-        // create a default heap where the upload heap will copy its contents into (contents being the texture)
-        HRESULT hr = a_device->CreateCommittedResource(
-            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
-            D3D12_HEAP_FLAG_NONE, // no flags
-            &textureDesc, // the description of our texture
-            D3D12_RESOURCE_STATE_COPY_DEST, // We will copy the texture from the upload heap to here, so we start it out in a copy dest state
-            nullptr, // used for render targets and depth/stencil buffers
-            IID_PPV_ARGS(&textureBuffer));
-        if (FAILED(hr))
-        {
-            return;
-        }
-        textureBuffer->SetName(L"Texture Buffer Resource Heap");
-
-        UINT64 textureUploadBufferSize;
-        // this function gets the size an upload buffer needs to be to upload a texture to the gpu.
-        // each row must be 256 byte aligned except for the last row, which can just be the size in bytes of the row
-        // eg. textureUploadBufferSize = ((((width * numBytesPerPixel) + 255) & ~255) * (height - 1)) + (width * numBytesPerPixel);
-        //textureUploadBufferSize = (((imageBytesPerRow + 255) & ~255) * (textureDesc.Height - 1)) + imageBytesPerRow;
-        a_device->GetCopyableFootprints(&textureDesc, 0, 1, 0, nullptr, nullptr, nullptr, &textureUploadBufferSize);
-
-        // now we create an upload heap to upload our texture to the GPU
-        hr = a_device->CreateCommittedResource(
-            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
-            D3D12_HEAP_FLAG_NONE, // no flags
-            &CD3DX12_RESOURCE_DESC::Buffer(textureUploadBufferSize), // resource description for a buffer (storing the image data in this heap just to copy to the default heap)
-            D3D12_RESOURCE_STATE_GENERIC_READ, // We will copy the contents from this heap to the default heap above
-            nullptr,
-            IID_PPV_ARGS(&textureBufferUploadHeap));
-        if (FAILED(hr))
-        {
-            return;
-        }
-        textureBufferUploadHeap->SetName(L"Texture Buffer Upload Resource Heap");
-
-        // store vertex buffer in upload heap
-        D3D12_SUBRESOURCE_DATA textureData = {};
-        textureData.pData = &imageData[0]; // pointer to our image data
-        textureData.RowPitch = imageBytesPerRow; // size of all our triangle vertex data
-        textureData.SlicePitch = imageBytesPerRow * textureDesc.Height; // also the size of our triangle vertex data
-
-                                                                        // Now we copy the upload buffer contents to the default heap
-        UpdateSubresources(a_commandList, textureBuffer, textureBufferUploadHeap, 0, 0, 1, &textureData);
-
-        // transition the texture default heap to a pixel shader resource (we will be sampling from this heap in the pixel shader to get the color of pixels)
-        a_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(textureBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
-
-        // create the descriptor heap that will store our srv
-        D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-        heapDesc.NumDescriptors = 1;
-        heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-        heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        hr = a_device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&mainDescriptorHeap));
-        if (FAILED(hr))
-        {
-            return;
-        }
-
-        // now we create a shader resource view (descriptor that points to the texture and describes it)
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Format = textureDesc.Format;
-        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MipLevels = 1;
-        a_device->CreateShaderResourceView(textureBuffer, &srvDesc, mainDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+    if (!HaveATexture()) {
+        return;
     }
+
+    // Load the image from file
+    D3D12_RESOURCE_DESC textureDesc;
+    int imageBytesPerRow;
+    BYTE* imageData;
+    int imageSize = LoadImageDataFromFile(&imageData, textureDesc, L"cube.jpg", imageBytesPerRow);
+
+    // create a default heap where the upload heap will copy its contents into (contents being the texture)
+    HRESULT hr = a_device->CreateCommittedResource(
+        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
+        D3D12_HEAP_FLAG_NONE, // no flags
+        &textureDesc, // the description of our texture
+        D3D12_RESOURCE_STATE_COPY_DEST, // We will copy the texture from the upload heap to here, so we start it out in a copy dest state
+        nullptr, // used for render targets and depth/stencil buffers
+        IID_PPV_ARGS(&textureBuffer));
+    if (FAILED(hr))
+    {
+        return;
+    }
+    textureBuffer->SetName(L"Texture Buffer Resource Heap");
+
+    UINT64 textureUploadBufferSize;
+    // this function gets the size an upload buffer needs to be to upload a texture to the gpu.
+    // each row must be 256 byte aligned except for the last row, which can just be the size in bytes of the row
+    // eg. textureUploadBufferSize = ((((width * numBytesPerPixel) + 255) & ~255) * (height - 1)) + (width * numBytesPerPixel);
+    //textureUploadBufferSize = (((imageBytesPerRow + 255) & ~255) * (textureDesc.Height - 1)) + imageBytesPerRow;
+    a_device->GetCopyableFootprints(&textureDesc, 0, 1, 0, nullptr, nullptr, nullptr, &textureUploadBufferSize);
+
+    // now we create an upload heap to upload our texture to the GPU
+    hr = a_device->CreateCommittedResource(
+        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
+        D3D12_HEAP_FLAG_NONE, // no flags
+        &CD3DX12_RESOURCE_DESC::Buffer(textureUploadBufferSize), // resource description for a buffer (storing the image data in this heap just to copy to the default heap)
+        D3D12_RESOURCE_STATE_GENERIC_READ, // We will copy the contents from this heap to the default heap above
+        nullptr,
+        IID_PPV_ARGS(&textureBufferUploadHeap));
+    if (FAILED(hr))
+    {
+        return;
+    }
+    textureBufferUploadHeap->SetName(L"Texture Buffer Upload Resource Heap");
+
+    // store vertex buffer in upload heap
+    D3D12_SUBRESOURCE_DATA textureData = {};
+    textureData.pData = &imageData[0]; // pointer to our image data
+    textureData.RowPitch = imageBytesPerRow; // size of all our triangle vertex data
+    textureData.SlicePitch = imageBytesPerRow * textureDesc.Height; // also the size of our triangle vertex data
+
+                                                                    // Now we copy the upload buffer contents to the default heap
+    UpdateSubresources(a_commandList, textureBuffer, textureBufferUploadHeap, 0, 0, 1, &textureData);
+
+    // transition the texture default heap to a pixel shader resource (we will be sampling from this heap in the pixel shader to get the color of pixels)
+    a_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(textureBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
+
+    // create the descriptor heap that will store our srv
+    D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
+    heapDesc.NumDescriptors = 1;
+    heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    hr = a_device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&mainDescriptorHeap));
+    if (FAILED(hr))
+    {
+        return;
+    }
+
+    // now we create a shader resource view (descriptor that points to the texture and describes it)
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.Format = textureDesc.Format;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+    a_device->CreateShaderResourceView(textureBuffer, &srvDesc, mainDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+    
 }
 
 

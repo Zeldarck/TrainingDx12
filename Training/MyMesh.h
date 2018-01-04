@@ -47,6 +47,7 @@ class MyMesh
         D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView();
 
         void SetObj(std::string a_obj);
+        bool HaveATexture();
         void Draw(ID3D12GraphicsCommandList * a_commandList);
         void PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList);
         void PushTextureOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList);

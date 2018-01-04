@@ -533,7 +533,7 @@ bool InitD3D()
 	}
 
 
-    m_cubeMesh.SetObj("cube.obj");
+    m_cubeMesh.SetObj("soldier.obj");
     m_TorusMesh.SetObj("cube.obj");
 
     m_cubeMesh.PushOnGPU(device, commandList);
@@ -749,7 +749,7 @@ void UpdatePipeline()
 
     commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-
+/*
     //Not good way? Don't use device in that?
     if (GetAsyncKeyState(VK_LBUTTON) && !add_stickMan) {
         MyMesh* sphere = new MyMesh();
@@ -761,7 +761,7 @@ void UpdatePipeline()
         go->SetMesh(sphere);
         go->CreateCBUploadHeap(device, frameBufferCount);
         add_stickMan = true;
-    }
+    }*/
 
     
 	// transition the "frameIndex" render target from the render target state to the present state. If the debug layer is enabled, you will receive a
