@@ -115,7 +115,7 @@ MyMesh m_TorusMesh;
 
 ID3D12Resource* depthStencilBuffer; // This is the memory for our depth buffer. it will also be used for a stencil buffer in a later tutorial
 ID3D12DescriptorHeap* dsDescriptorHeap; // This is a heap for our depth/stencil buffer descriptor
-float speed = 0.0001f;
+float speed = 0.001f;
 
 bool add_stickMan = false;
 

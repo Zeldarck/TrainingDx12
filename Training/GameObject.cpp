@@ -35,24 +35,29 @@ void GameObject::AddChildren(GameObject * a_child)
 
 void GameObject::Draw(ID3D12GraphicsCommandList * a_commandList, int a_frameIndex, Camera* a_camera, DirectX::XMMATRIX a_transformationMatrix /* = DirectX::XMMatrixIdentity() */)
 {
+    DirectX::XMMATRIX worldMatrix = GetLocalWorldMatrix() * a_transformationMatrix;
 
-    DirectX::XMMATRIX wvpMat = GetWorldMatrix() * a_transformationMatrix *  a_camera->GetVPMatrix(); // create wvp matrix
-    DirectX::XMMATRIX transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
-    XMStoreFloat4x4(&cbObject.wvpMat, transposed); // store transposed wvp matrix in constant buffer
+    //If we have a mesh
+    if (m_mesh) {
+        DirectX::XMMATRIX wvpMat = worldMatrix *  a_camera->GetVPMatrix(); // create wvp matrix
 
-    memcpy(cbvGPUAddress[a_frameIndex], &cbObject, sizeof(cbObject));
+        DirectX::XMMATRIX transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
+        XMStoreFloat4x4(&cbObject.wvpMat, transposed); // store transposed wvp matrix in constant buffer
+
+        memcpy(cbvGPUAddress[a_frameIndex], &cbObject, sizeof(cbObject));
 
 
 
-    a_commandList->IASetVertexBuffers(0, 1, m_mesh->GetVertexBufferView()); // set the vertex buffer (using the vertex buffer view)
-    a_commandList->IASetIndexBuffer(m_mesh->GetIndexBufferView()); // set the vertex buffer (using the vertex buffer view)
+        a_commandList->IASetVertexBuffers(0, 1, m_mesh->GetVertexBufferView()); // set the vertex buffer (using the vertex buffer view)
+        a_commandList->IASetIndexBuffer(m_mesh->GetIndexBufferView()); // set the vertex buffer (using the vertex buffer view)
 
-    a_commandList->SetGraphicsRootConstantBufferView(0, constantBufferUploadHeaps[a_frameIndex]->GetGPUVirtualAddress());
+        a_commandList->SetGraphicsRootConstantBufferView(0, constantBufferUploadHeaps[a_frameIndex]->GetGPUVirtualAddress());
 
-    a_commandList->DrawIndexedInstanced(m_mesh->GetCountIndex(), 1, 0, 0, 0);
-    
+        a_commandList->DrawIndexedInstanced(m_mesh->GetCountIndex(), 1, 0, 0, 0);
+    }
+
     for (GameObject* go : m_children) {
-        go->Draw(a_commandList, a_frameIndex, a_camera, GetWorldMatrix() * a_transformationMatrix);
+        go->Draw(a_commandList, a_frameIndex, a_camera, worldMatrix);
     }
 
 }
@@ -90,9 +95,17 @@ void GameObject::SetMesh(MyMesh* a_mesh)
 }
 
 
+DirectX::XMMATRIX GameObject::GetLocalWorldMatrix() {
+    return XMLoadFloat4x4(&m_transformationMatrix) * DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+}
+
 DirectX::XMMATRIX GameObject::GetWorldMatrix() {
     DirectX::XMMATRIX parentWorld = DirectX::XMMatrixIdentity();
-    return XMLoadFloat4x4(&m_transformationMatrix) * DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z) * parentWorld;
+    if (m_parent) {
+        parentWorld *= m_parent->GetWorldMatrix();
+    }
+
+    return GetLocalWorldMatrix() * parentWorld;
 }
 
 

@@ -713,12 +713,12 @@ void UpdatePipeline()
         MyMesh* sphere = new MyMesh();
         GameObject* go = new GameObject(DirectX::XMFLOAT4(-1.0f,0.0f,0.0f,0.0f));
         go->SetParent(&m_gameObject2);
-        sphere->SetObj("sphere.obj");
+       // sphere->SetObj("sphere.obj");
 
-        sphere->PushOnGPU(device, commandList);
+        //sphere->PushOnGPU(device, commandList);
 
-        go->SetMesh(sphere);
-        go->CreateCBUploadHeap(device, frameBufferCount);
+      //  go->SetMesh(sphere);
+        //go->CreateCBUploadHeap(device, frameBufferCount);
         add_stickMan = true;
     }
 

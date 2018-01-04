@@ -18,8 +18,8 @@ class GameObject
     public:
         ID3D12Resource** constantBufferUploadHeaps;
         UINT8** cbvGPUAddress;
-        MyMesh* m_mesh;
-        GameObject* m_parent;
+        MyMesh* m_mesh = nullptr;
+        GameObject* m_parent = nullptr;
 
         void Rotate(float a_x, float a_y, float a_z, float a_value);
         void Translate(float a_x, float a_y, float a_z);
@@ -33,6 +33,8 @@ class GameObject
         void SetMesh(MyMesh* a_mesh);
 
         ConstantBufferObject cbObject;
+
+        DirectX::XMMATRIX GetLocalWorldMatrix();
 
         DirectX::XMMATRIX GetWorldMatrix();
 
