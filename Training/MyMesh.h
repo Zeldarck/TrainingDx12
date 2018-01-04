@@ -13,26 +13,28 @@ struct Vertex {
 
 class MyMesh
 {
-public:
-    objl::Loader Loader;
-    objl::Mesh* m_mesh;
+    public:
+        objl::Mesh m_mesh;
+        std::vector<MyMesh*> m_children;
 
-    ID3D12Resource* vertexBuffer;
-    ID3D12Resource* indexBuffer;
-    D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-    D3D12_INDEX_BUFFER_VIEW indexBufferView;
-    int vBufferSize;
-    int vIndexSize;
+        ID3D12Resource* vertexBuffer;
+        ID3D12Resource* indexBuffer;
+        D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+        D3D12_INDEX_BUFFER_VIEW indexBufferView;
+        int vBufferSize;
+        int vIndexSize;
 
-    D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView();
-    D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView();
+        D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView();
+        D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView();
 
-    void SetObj(std::string a_obj);
-    void PushOnGPU(ID3D12Device * device, ID3D12GraphicsCommandList * commandList);
-    void SetBufferVertexView();
-    void SetBufferIndexView();
-    int GetCountIndex();
-    MyMesh();
-    ~MyMesh();
+        void SetObj(std::string a_obj);
+        void Draw(ID3D12GraphicsCommandList * a_commandList);
+        void PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList);
+        void SetBufferVertexView();
+        void SetBufferIndexView();
+        int GetCountIndex();
+        MyMesh();
+        MyMesh(objl::Mesh a_mesh);
+        ~MyMesh();
 };
 

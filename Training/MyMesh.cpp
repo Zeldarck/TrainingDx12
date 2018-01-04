@@ -13,31 +13,48 @@ D3D12_INDEX_BUFFER_VIEW * MyMesh::GetIndexBufferView()
 
 void MyMesh::SetObj(std::string a_obj)
 {
+    objl::Loader Loader;
 
     bool loadout = Loader.LoadFile(a_obj);
-    m_mesh = &Loader.LoadedMeshes[0];
+    m_mesh = Loader.LoadedMeshes[0];
+    for (int i = 1; i < Loader.LoadedMeshes.size(); ++i) {
+        MyMesh* mesh =  new MyMesh(Loader.LoadedMeshes[i]);
+        m_children.push_back(mesh);
+    }
 }
 
-void MyMesh::PushOnGPU(ID3D12Device * device, ID3D12GraphicsCommandList * commandList)
+void MyMesh::Draw(ID3D12GraphicsCommandList * a_commandList) {
+    a_commandList->IASetVertexBuffers(0, 1, GetVertexBufferView()); // set the vertex buffer (using the vertex buffer view)
+    a_commandList->IASetIndexBuffer(GetIndexBufferView()); // set the vertex buffer (using the vertex buffer view)
+
+
+    a_commandList->DrawIndexedInstanced(GetCountIndex(), 1, 0, 0, 0);
+    for (MyMesh* a_mesh : m_children) {
+        a_mesh->Draw(a_commandList);
+    }
+
+}
+
+void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList)
 {
-    Vertex *vList = new Vertex[m_mesh->Vertices.size()];
+    Vertex *vList = new Vertex[m_mesh.Vertices.size()];
 
-    for (int j = 0; j < m_mesh->Vertices.size(); j++)
+    for (int j = 0; j < m_mesh.Vertices.size(); j++)
     {
-        vList[j] = { m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX };
+        vList[j] = { m_mesh.Vertices[j].Position.X, m_mesh.Vertices[j].Position.Y, m_mesh.Vertices[j].Position.Z, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX };
     }
 
-    vBufferSize = sizeof(Vertex) * m_mesh->Vertices.size();
+    vBufferSize = sizeof(Vertex) * m_mesh.Vertices.size();
 
 
-    DWORD *vIndices = new DWORD[m_mesh->Indices.size()];
-    for (int j = 0; j < m_mesh->Indices.size(); j++) {
-        vIndices[j] = m_mesh->Indices[j];
+    DWORD *vIndices = new DWORD[m_mesh.Indices.size()];
+    for (int j = 0; j < m_mesh.Indices.size(); j++) {
+        vIndices[j] = m_mesh.Indices[j];
     }
 
-    vIndexSize = sizeof(DWORD) * m_mesh->Indices.size();
+    vIndexSize = sizeof(DWORD) * m_mesh.Indices.size();
 
-    device->CreateCommittedResource(
+    a_device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
         D3D12_HEAP_FLAG_NONE, // no flags
         &CD3DX12_RESOURCE_DESC::Buffer(vBufferSize), // resource description for a buffer
@@ -54,7 +71,7 @@ void MyMesh::PushOnGPU(ID3D12Device * device, ID3D12GraphicsCommandList * comman
     // upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
     // We will upload the vertex buffer using this heap to the default heap
     ID3D12Resource* vBufferUploadHeap;
-    device->CreateCommittedResource(
+    a_device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
         D3D12_HEAP_FLAG_NONE, // no flags
         &CD3DX12_RESOURCE_DESC::Buffer(vBufferSize), // resource description for a buffer
@@ -71,10 +88,10 @@ void MyMesh::PushOnGPU(ID3D12Device * device, ID3D12GraphicsCommandList * comman
 
                                          // we are now creating a command with the command list to copy the data from
                                          // the upload heap to the default heap
-    UpdateSubresources(commandList, vertexBuffer, vBufferUploadHeap, 0, 0, 1, &vertexData);
+    UpdateSubresources(a_commandList, vertexBuffer, vBufferUploadHeap, 0, 0, 1, &vertexData);
 
     // transition the vertex buffer data from copy destination state to vertex buffer state
-    commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
+    a_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
 
 
 
@@ -84,7 +101,7 @@ void MyMesh::PushOnGPU(ID3D12Device * device, ID3D12GraphicsCommandList * comman
     // default heap is memory on the GPU. Only the GPU has access to this memory
     // To get data into this heap, we will have to upload the data using
     // an upload heap
-    device->CreateCommittedResource(
+    a_device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
         D3D12_HEAP_FLAG_NONE, // no flags
         &CD3DX12_RESOURCE_DESC::Buffer(vIndexSize), // resource description for a buffer
@@ -101,7 +118,7 @@ void MyMesh::PushOnGPU(ID3D12Device * device, ID3D12GraphicsCommandList * comman
     // upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
     // We will upload the vertex buffer using this heap to the default heap
     ID3D12Resource* vIndexUploadHeap;
-    device->CreateCommittedResource(
+    a_device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
         D3D12_HEAP_FLAG_NONE, // no flags
         &CD3DX12_RESOURCE_DESC::Buffer(vIndexSize), // resource description for a buffer
@@ -119,13 +136,20 @@ void MyMesh::PushOnGPU(ID3D12Device * device, ID3D12GraphicsCommandList * comman
 
                                        // we are now creating a command with the command list to copy the data from
                                        // the upload heap to the default heap
-    UpdateSubresources(commandList, indexBuffer, vIndexUploadHeap, 0, 0, 1, &IndexData);
+    UpdateSubresources(a_commandList, indexBuffer, vIndexUploadHeap, 0, 0, 1, &IndexData);
 
     // transition the vertex buffer data from copy destination state to vertex buffer state
-    commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
+    a_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
 
     SetBufferVertexView();
     SetBufferIndexView();
+
+    for (MyMesh* a_mesh : m_children) {
+        a_mesh->PushOnGPU(a_device, a_commandList);
+    }
+
+
+
 }
 
 
@@ -146,7 +170,7 @@ void MyMesh::SetBufferIndexView()
 
 int MyMesh::GetCountIndex()
 {
-    return m_mesh->Indices.size();
+    return m_mesh.Indices.size();
 }
 
 
@@ -154,6 +178,11 @@ MyMesh::MyMesh()
 {
 }
 
+
+MyMesh::MyMesh(objl::Mesh a_mesh)
+{
+    m_mesh = a_mesh;
+}
 
 MyMesh::~MyMesh()
 {

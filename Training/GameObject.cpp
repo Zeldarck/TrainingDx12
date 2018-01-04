@@ -48,12 +48,10 @@ void GameObject::Draw(ID3D12GraphicsCommandList * a_commandList, int a_frameInde
 
 
 
-        a_commandList->IASetVertexBuffers(0, 1, m_mesh->GetVertexBufferView()); // set the vertex buffer (using the vertex buffer view)
-        a_commandList->IASetIndexBuffer(m_mesh->GetIndexBufferView()); // set the vertex buffer (using the vertex buffer view)
-
         a_commandList->SetGraphicsRootConstantBufferView(0, constantBufferUploadHeaps[a_frameIndex]->GetGPUVirtualAddress());
 
-        a_commandList->DrawIndexedInstanced(m_mesh->GetCountIndex(), 1, 0, 0, 0);
+        m_mesh->Draw(a_commandList);
+
     }
 
     for (GameObject* go : m_children) {
@@ -128,5 +126,6 @@ GameObject::GameObject(DirectX::XMFLOAT4 a_position, DirectX::XMFLOAT4 a_target,
 
 GameObject::~GameObject()
 {
-//delete m_parent;
+    //if(m_parent)
+     // delete m_parent;
 }

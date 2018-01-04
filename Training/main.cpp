@@ -495,7 +495,7 @@ bool InitD3D()
 	}
 
 
-    m_cubeMesh.SetObj("cube.obj");
+    m_cubeMesh.SetObj("multimesh.obj");
     m_TorusMesh.SetObj("Torus.obj");
 
     m_cubeMesh.PushOnGPU(device, commandList);
@@ -574,12 +574,14 @@ bool InitD3D()
     m_camera.SetFOV(45.0f);
     m_camera.SetView(Width, Height);
 
-    //m_gameObject2.Scale(0.4f, 0.5f, 1.0f);
+    m_gameObject1.Scale(0.05f, 0.05f, 0.05f);
     m_gameObject2.SetParent(&m_gameObject1);
-
+    m_gameObject1.SetParent(&m_scene);
 
     m_gameObject1.SetMesh(&m_cubeMesh);
     m_gameObject2.SetMesh(&m_TorusMesh);
+
+    return true;
 }
 
 void UpdateCamera() {
@@ -703,7 +705,7 @@ void UpdatePipeline()
 	commandList->RSSetScissorRects(1, &scissorRect); // set the scissor rects
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
 
-    m_gameObject1.Draw( commandList, frameIndex, &m_camera);
+    m_scene.Draw( commandList, frameIndex, &m_camera);
 
     commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
@@ -713,12 +715,11 @@ void UpdatePipeline()
         MyMesh* sphere = new MyMesh();
         GameObject* go = new GameObject(DirectX::XMFLOAT4(-1.0f,0.0f,0.0f,0.0f));
         go->SetParent(&m_gameObject2);
-       // sphere->SetObj("sphere.obj");
+        sphere->SetObj("sphere.obj");
 
-        //sphere->PushOnGPU(device, commandList);
-
-      //  go->SetMesh(sphere);
-        //go->CreateCBUploadHeap(device, frameBufferCount);
+        sphere->PushOnGPU(device, commandList);
+        go->SetMesh(sphere);
+        go->CreateCBUploadHeap(device, frameBufferCount);
         add_stickMan = true;
     }
 
