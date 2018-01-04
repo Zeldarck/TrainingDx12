@@ -2,6 +2,7 @@
 #include "OBJ_Loader.h"
 #include "d3dx12.h"
 #include <DirectXMath.h>
+#include <wincodec.h>
 
 
 struct Vertex {
@@ -26,10 +27,20 @@ class MyMesh
         std::vector<MyMesh*> m_children;
         void SetBufferVertexView();
         void SetBufferIndexView();
-
-
+        ID3D12DescriptorHeap* mainDescriptorHeap;
+        ID3D12Resource* textureBufferUploadHeap;
+        ID3D12Resource* textureBuffer;
 
     public:
+
+        int LoadImageDataFromFile(BYTE** imageData, D3D12_RESOURCE_DESC& resourceDescription, LPCWSTR filename, int &bytesPerRow);
+
+        DXGI_FORMAT GetDXGIFormatFromWICFormat(WICPixelFormatGUID& wicFormatGUID);
+        WICPixelFormatGUID GetConvertToWICFormat(WICPixelFormatGUID& wicFormatGUID);
+        int GetDXGIFormatBitsPerPixel(DXGI_FORMAT& dxgiFormat);
+
+
+
         std::vector<MyMesh*> getChildren();
 
         D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView();
@@ -38,6 +49,7 @@ class MyMesh
         void SetObj(std::string a_obj);
         void Draw(ID3D12GraphicsCommandList * a_commandList);
         void PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList);
+        void PushTextureOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList);
         int GetCountIndex();
         MyMesh();
         MyMesh(objl::Mesh * a_mesh);
