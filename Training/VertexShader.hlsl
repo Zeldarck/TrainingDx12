@@ -21,7 +21,7 @@ VS_OUTPUT main(VS_INPUT input)
 {
 	VS_OUTPUT output;
     output.pos = mul(input.pos, wvpMat);
-   // output.color = input.color;
+    output.color = input.color;
     output.texCoord = input.texCoord;
 	return output;
 }
