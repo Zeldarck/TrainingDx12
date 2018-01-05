@@ -23,6 +23,7 @@ private:
     ID3D12Device * m_device = nullptr;
 
 public:
+    int GetDescriptorTable(D3D12_ROOT_DESCRIPTOR_TABLE *& descriptorTable, D3D12_STATIC_SAMPLER_DESC *& sampler);
     ID3D12RootSignature* GetRootSignature();
     RootSignature(ID3D12Device* a_device,ROOT_SIGNATURE_FLAG a_flags);
     ~RootSignature();
