@@ -39,7 +39,7 @@ class GameObject
         void AddChildren(GameObject* a_child);
         void Draw(ID3D12GraphicsCommandList * a_commandList, int a_frameIndex, Camera * a_camera, DirectX::XMMATRIX a_transformationMatrix = DirectX::XMMatrixIdentity());
 
-        void CreateCBUploadHeap(ID3D12Device * device, int frameBufferCount);
+        void CreateCBUploadHeap(ID3D12Device * a_device, int a_frameBufferCount);
 
         void SetMesh(MyMesh* a_mesh);
 

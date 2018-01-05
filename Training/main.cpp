@@ -509,29 +509,7 @@ bool InitD3D()
 	// you only set the VS. It's possible that you have a pso that only outputs data with the stream
 	// output, and not on a render target, which means you would not need anything after the stream
 	// output.
-
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; // a structure to define a pso
-	psoDesc.InputLayout = inputLayoutDesc; // the structure describing our input layout
-	psoDesc.pRootSignature = rootSignature; // the root signature that describes the input data this pso needs
-	psoDesc.VS = vertexShaderBytecode; // structure describing where to find the vertex shader bytecode and how large it is
-	psoDesc.PS = pixelShaderBytecode; // same as VS but for pixel shader
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // type of topology we are drawing
-	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the render target
-	psoDesc.SampleDesc = sampleDesc; // must be the same sample description as the swapchain and depth/stencil buffer
-	psoDesc.SampleMask = 0xffffffff; // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
-	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT); // a default rasterizer state.
-	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT); // a default blent state.
-	psoDesc.NumRenderTargets = 1; // we are only binding one render target
-    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT); // a default depth stencil state
-
-	// create the pso
-	hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineStateObject));
-	if (FAILED(hr))
-	{
-        Running = false;
-        return false;
-	}
-
+    pso = PSOFactory::GetInstance(device, inputLayoutDesc, pixelShaderBytecode, vertexShaderBytecode, rootSignature, sampleDesc)->CreatePSO(PSO_FLAGS_FULLCOLOR);
 
     m_cubeMesh.SetObj("Assets/soldier.obj");
     m_TorusMesh.SetObj("Assets/cube.obj");
@@ -626,26 +604,26 @@ void UpdateCamera() {
 
     //Move Up and bottom
     if (GetAsyncKeyState('Z')) {
-        m_camera.Translate(0.0f, 0.0f, -speed/2.0f);
+        m_camera.Translate(0.0f, 0.0f, -speed/4.0f);
     }
     else if (GetAsyncKeyState('S')) {
-        m_camera.Translate(0.0f, 0.0f, speed / 2.0f);
+        m_camera.Translate(0.0f, 0.0f, speed / 4.0f);
     }
 
     //Move Right and Left
     if (GetAsyncKeyState('Q')) {
-        m_camera.Translate(speed / 2.0f, 0.0f, 0.0f);
+        m_camera.Translate(speed / 4.0f, 0.0f, 0.0f);
     }
     else if (GetAsyncKeyState('D')) {
-        m_camera.Translate(-speed / 2.0f, 0.0f, 0.0f);
+        m_camera.Translate(-speed / 4.0f, 0.0f, 0.0f);
     }
 
     //Move forward/Backward
     if (GetAsyncKeyState('P')) {
-        m_camera.Translate(0.0f, -speed / 2.0f, 0.0f);
+        m_camera.Translate(0.0f, -speed / 4.0f, 0.0f);
     }
     else if (GetAsyncKeyState('M')) {
-        m_camera.Translate(0.0f, speed / 2.0f, 0.0f);
+        m_camera.Translate(0.0f, speed / 4.0f, 0.0f);
     }
 
     //Rotate Y axis
@@ -714,7 +692,7 @@ void UpdatePipeline()
 	// but in this tutorial we are only clearing the rtv, and do not actually need
 	// anything but an initial default pipeline, which is what we get by setting
 	// the second parameter to NULL
-	hr = commandList->Reset(commandAllocator[frameIndex], pipelineStateObject);
+	hr = commandList->Reset(commandAllocator[frameIndex], pso->GetPipelineStateObject());
 	if (FAILED(hr))
 	{
 		Running = false;
@@ -834,7 +812,6 @@ void Cleanup()
 		SAFE_RELEASE(fence[i]);
 	};
 
-	SAFE_RELEASE(pipelineStateObject);
 	SAFE_RELEASE(rootSignature);
 }
 

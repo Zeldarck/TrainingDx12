@@ -98,7 +98,6 @@ void Cleanup(); // release com ojects and clean up memory
 
 void WaitForPreviousFrame(); // wait until gpu is finished with command list
 
-ID3D12PipelineState* pipelineStateObject; // pso containing a pipeline state
 
 ID3D12RootSignature* rootSignature; // root signature defines data shaders will access
 
@@ -122,6 +121,8 @@ ID3D12DescriptorHeap* dsDescriptorHeap; // This is a heap for our depth/stencil 
 float speed = 0.0005f;
 
 bool add_stickMan = false;
+
+PSO* pso;
 
 
 
