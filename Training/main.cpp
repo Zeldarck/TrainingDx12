@@ -424,65 +424,9 @@ bool InitD3D()
 		return false;
 	}
 
-	// create vertex and pixel shaders
+    Shader shaderVertex = Shader("TextureVertexShader.hlsl", SHADER_TYPE_VERTEX);
+    Shader shaderPixel = Shader("TexturePixelShader.hlsl", SHADER_TYPE_PIXEL);
 
-	// when debugging, we can compile the shader files at runtime.
-	// but for release versions, we can compile the hlsl shaders
-	// with fxc.exe to create .cso files, which contain the shader
-	// bytecode. We can load the .cso files at runtime to get the
-	// shader bytecode, which of course is faster than compiling
-	// them at runtime
-
-	// compile vertex shader
-	ID3DBlob* vertexShader; // d3d blob for holding vertex shader bytecode
-	ID3DBlob* errorBuff; // a buffer holding the error data if any
-	hr = D3DCompileFromFile(L"TextureVertexShader.hlsl",
-		nullptr,
-		nullptr,
-		"main",
-		"vs_5_0",
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-		0,
-		&vertexShader,
-		&errorBuff);
-	if (FAILED(hr))
-	{
-		OutputDebugStringA((char*)errorBuff->GetBufferPointer());
-		return false;
-	}
-
-	// fill out a shader bytecode structure, which is basically just a pointer
-	// to the shader bytecode and the size of the shader bytecode
-	D3D12_SHADER_BYTECODE vertexShaderBytecode = {};
-	vertexShaderBytecode.BytecodeLength = vertexShader->GetBufferSize();
-	vertexShaderBytecode.pShaderBytecode = vertexShader->GetBufferPointer();
-
-	// compile pixel shader
-	ID3DBlob* pixelShader;
-	hr = D3DCompileFromFile(L"TexturePixelShader.hlsl",
-		nullptr,
-		nullptr,
-		"main",
-		"ps_5_0",
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-		0,
-		&pixelShader,
-		&errorBuff);
-	if (FAILED(hr))
-	{
-		OutputDebugStringA((char*)errorBuff->GetBufferPointer());
-		return false;
-	}
-
-	// fill out shader bytecode structure for pixel shader
-	D3D12_SHADER_BYTECODE pixelShaderBytecode = {};
-	pixelShaderBytecode.BytecodeLength = pixelShader->GetBufferSize();
-	pixelShaderBytecode.pShaderBytecode = pixelShader->GetBufferPointer();
-
-	// create input layout
-
-	// The input layout is used by the Input Assembler so that it knows
-	// how to read the vertex data bound to it.
 
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 	{
@@ -498,18 +442,8 @@ bool InitD3D()
 	inputLayoutDesc.NumElements = sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC);
 	inputLayoutDesc.pInputElementDescs = inputLayout;
 
-	// create a pipeline state object (PSO)
 
-	// In a real application, you will have many pso's. for each different shader
-	// or different combinations of shaders, different blend states or different rasterizer states,
-	// different topology types (point, line, triangle, patch), or a different number
-	// of render targets you will need a pso
-
-	// VS is the only required shader for a pso. You might be wondering when a case would be where
-	// you only set the VS. It's possible that you have a pso that only outputs data with the stream
-	// output, and not on a render target, which means you would not need anything after the stream
-	// output.
-    pso = PSOFactory::GetInstance(device, inputLayoutDesc, pixelShaderBytecode, vertexShaderBytecode, rootSignature, sampleDesc)->CreatePSO(PSO_FLAGS_FULLCOLOR);
+    pso = PSOFactory::GetInstance(device, inputLayoutDesc, *shaderPixel.GetShaderByteCode(), *shaderVertex.GetShaderByteCode(), rootSignature, sampleDesc)->CreatePSO(PSO_FLAGS_FULLCOLOR);
 
     m_cubeMesh.SetObj("Assets/soldier.obj");
     m_TorusMesh.SetObj("Assets/cube.obj");
@@ -698,7 +632,7 @@ void UpdatePipeline()
 		Running = false;
 	}
 
-	// here we start recording commands into the commandList (which all the commands will be stored in the commandAllocator)
+    // here we start recording commands into the commandList (which all the commands will be stored in the commandAllocator)
 
 	// transition the "frameIndex" render target from the present state to the render target state so the command list draws to it starting from here
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));

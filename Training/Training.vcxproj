@@ -160,6 +160,7 @@
     <ClCompile Include="MyMesh.cpp" />
     <ClCompile Include="PSO.cpp" />
     <ClCompile Include="PSOFactory.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +171,7 @@
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="PSO.h" />
     <ClInclude Include="PSOFactory.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
