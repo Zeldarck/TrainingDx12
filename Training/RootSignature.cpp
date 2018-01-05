@@ -47,34 +47,38 @@ ID3D12RootSignature * RootSignature::GetRootSignature()
 RootSignature::RootSignature(ID3D12Device* a_device, ROOT_SIGNATURE_FLAG a_flags)
 {
     m_device = a_device;
+
+    D3D12_ROOT_DESCRIPTOR_TABLE* descriptorTable = nullptr;
+    D3D12_STATIC_SAMPLER_DESC* sampler = nullptr;
+
+    int numTextures = 0;
+    
+    if (a_flags == ROOT_SIGNATURE_FLAG_TEXTURE) {
+        numTextures = GetDescriptorTable(descriptorTable, sampler);
+    }
+
     // create a root descriptor, which explains where to find the data for this root parameter
     D3D12_ROOT_DESCRIPTOR rootCBVDescriptor;
     rootCBVDescriptor.RegisterSpace = 0;
     rootCBVDescriptor.ShaderRegister = 0;
 
-    D3D12_ROOT_DESCRIPTOR_TABLE* descriptorTable = nullptr;
-    D3D12_STATIC_SAMPLER_DESC* sampler = nullptr;
-
-    int numTextures = GetDescriptorTable(descriptorTable,sampler);
-
-
-
                                                                    // create a root parameter for the root descriptor and fill it out
-    D3D12_ROOT_PARAMETER  rootParameters[2]; // two root parameters
+    D3D12_ROOT_PARAMETER*  rootParameters = new D3D12_ROOT_PARAMETER[1 + numTextures]; // two root parameters
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // this is a constant buffer view root descriptor
     rootParameters[0].Descriptor = rootCBVDescriptor; // this is the root descriptor for this root parameter
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // our pixel shader will be the only shader accessing this parameter for now
                                                                          // fill out the parameter for our descriptor table. Remember it's a good idea to sort parameters by frequency of change. Our constant
                                                                          // buffer will be changed multiple times per frame, while our descriptor table will not be changed at all (in this tutorial)
-    rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // this is a descriptor table
-    rootParameters[1].DescriptorTable = descriptorTable[0]; // this is our descriptor table for this root parameter
-    rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // our pixel shader will be the only shader accessing this parameter for now
-
+    for (int i = 0; i < numTextures; ++i) {
+        rootParameters[1 + i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // this is a descriptor table
+        rootParameters[1 + i].DescriptorTable = descriptorTable[i]; // this is our descriptor table for this root parameter
+        rootParameters[1 + i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // our pixel shader will be the only shader accessing this parameter for now
+    }
                                                                         // create a static sampler
 
 
     CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-    rootSignatureDesc.Init(_countof(rootParameters), // we have 2 root parameters
+    rootSignatureDesc.Init(1 + numTextures, // we have 2 root parameters
         rootParameters, // a pointer to the beginning of our root parameters array
         numTextures, // we have one static sampler
         sampler, // a pointer to our static sampler (array)

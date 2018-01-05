@@ -20,6 +20,18 @@ PSOFactory* PSOFactory::GetInstance(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_
     return INSTANCE;
 }
 
+//call depuis exit de main
+void PSOFactory::DeleteInstance()
+{
+    delete INSTANCE;
+}
+
+void PSOFactory::ResetInstance()
+{
+    DeleteInstance();
+    //GetInstance();
+}
+
 PSO * PSOFactory::CreatePSO(PSO_FLAGS a_flag)
 {
     PSO* output = m_psoMap[a_flag];
@@ -28,13 +40,4 @@ PSO * PSOFactory::CreatePSO(PSO_FLAGS a_flag)
         m_psoMap[a_flag] =  output;
     }
     return output;
-}
-
-PSOFactory::PSOFactory()
-{
-}
-
-
-PSOFactory::~PSOFactory()
-{
 }
