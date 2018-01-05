@@ -161,6 +161,7 @@
     <ClCompile Include="PSO.cpp" />
     <ClCompile Include="PSOFactory.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShaderFactory.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +173,7 @@
     <ClInclude Include="PSO.h" />
     <ClInclude Include="PSOFactory.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderFactory.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>

@@ -19,6 +19,8 @@
 #include <wincodec.h>
 #include "PSOFactory.h"
 #include "Shader.h"
+#include "ShaderFactory.h"
+
 //using namespace DirectX; // we will be using the directxmath library
 
 // this will only call release if an object exists (prevents exceptions calling release on non existant objects)
