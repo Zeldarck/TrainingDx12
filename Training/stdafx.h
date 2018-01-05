@@ -17,6 +17,7 @@
 #include <time.h>
 #include "MyMesh.h"
 #include <wincodec.h>
+#include "PSOFactory.h"
 
 //using namespace DirectX; // we will be using the directxmath library
 

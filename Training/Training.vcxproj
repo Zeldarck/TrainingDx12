@@ -158,6 +158,8 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyMesh.cpp" />
+    <ClCompile Include="PSO.cpp" />
+    <ClCompile Include="PSOFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -165,6 +167,8 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="MyMesh.h" />
     <ClInclude Include="OBJ_Loader.h" />
+    <ClInclude Include="PSO.h" />
+    <ClInclude Include="PSOFactory.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

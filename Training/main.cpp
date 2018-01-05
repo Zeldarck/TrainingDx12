@@ -749,9 +749,12 @@ void UpdatePipeline()
 
     commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-/*
-    //Not good way? Don't use device in that?
+
+    /*  //Not good way? Don't use device in that?
     if (GetAsyncKeyState(VK_LBUTTON) && !add_stickMan) {
+        
+        PSOFactory::GetInstance()->CreatePSO(PSO_FLAGS_FULLCOLOR);
+
         MyMesh* sphere = new MyMesh();
         GameObject* go = new GameObject(DirectX::XMFLOAT4(-1.0f,0.0f,0.0f,0.0f));
         go->SetParent(&m_gameObject2);
