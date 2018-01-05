@@ -20,6 +20,7 @@
 #include "PSOFactory.h"
 #include "Shader.h"
 #include "ShaderFactory.h"
+#include "RootSignature.h"
 
 //using namespace DirectX; // we will be using the directxmath library
 
@@ -101,7 +102,7 @@ void Cleanup(); // release com ojects and clean up memory
 void WaitForPreviousFrame(); // wait until gpu is finished with command list
 
 
-ID3D12RootSignature* rootSignature; // root signature defines data shaders will access
+RootSignature* rootSignature; // root signature defines data shaders will access
 
 D3D12_VIEWPORT viewport; // area that output from rasterizer will be stretched to.
 
