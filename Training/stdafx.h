@@ -111,14 +111,14 @@ Camera m_camera = Camera(DirectX::XMFLOAT4(0.0f, 0.0f, -4.0f, 0.0f), DirectX::XM
 GameObject m_scene = GameObject(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f));
 
 GameObject m_gameObject1 = GameObject(DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f));
-GameObject m_gameObject2 = GameObject(DirectX::XMFLOAT4(2.0f, 0.0f, 0.0f, 0.0f));
+GameObject m_gameObject2 = GameObject(DirectX::XMFLOAT4(-2.0f, 0.0f, 0.0f, 0.0f));
 
 MyMesh m_cubeMesh;
 MyMesh m_TorusMesh;
 
 ID3D12Resource* depthStencilBuffer; // This is the memory for our depth buffer. it will also be used for a stencil buffer in a later tutorial
 ID3D12DescriptorHeap* dsDescriptorHeap; // This is a heap for our depth/stencil buffer descriptor
-float speed = 0.001f;
+float speed = 0.0005f;
 
 bool add_stickMan = false;
 

@@ -436,7 +436,7 @@ bool InitD3D()
 	// compile vertex shader
 	ID3DBlob* vertexShader; // d3d blob for holding vertex shader bytecode
 	ID3DBlob* errorBuff; // a buffer holding the error data if any
-	hr = D3DCompileFromFile(L"VertexShader.hlsl",
+	hr = D3DCompileFromFile(L"TextureVertexShader.hlsl",
 		nullptr,
 		nullptr,
 		"main",
@@ -459,7 +459,7 @@ bool InitD3D()
 
 	// compile pixel shader
 	ID3DBlob* pixelShader;
-	hr = D3DCompileFromFile(L"PixelShader.hlsl",
+	hr = D3DCompileFromFile(L"TexturePixelShader.hlsl",
 		nullptr,
 		nullptr,
 		"main",
@@ -533,8 +533,8 @@ bool InitD3D()
 	}
 
 
-    m_cubeMesh.SetObj("soldier.obj");
-    m_TorusMesh.SetObj("cube.obj");
+    m_cubeMesh.SetObj("Assets/soldier.obj");
+    m_TorusMesh.SetObj("Assets/cube.obj");
 
     m_cubeMesh.PushOnGPU(device, commandList);
     m_TorusMesh.PushOnGPU(device, commandList);
@@ -607,7 +607,7 @@ bool InitD3D()
     // build projection and view matrix
     DirectX::XMMATRIX tmpMat;
     m_camera.SetFarZ(1000.0f);
-    m_camera.SetNearZ(0.1f);
+    m_camera.SetNearZ(0.01f);
     m_camera.SetIsOrthographic(false);
     m_camera.SetFOV(45.0f);
     m_camera.SetView(Width, Height);
@@ -626,26 +626,26 @@ void UpdateCamera() {
 
     //Move Up and bottom
     if (GetAsyncKeyState('Z')) {
-        m_camera.Translate(0.0f, 0.0f, -speed);
+        m_camera.Translate(0.0f, 0.0f, -speed/2.0f);
     }
     else if (GetAsyncKeyState('S')) {
-        m_camera.Translate(0.0f, 0.0f, speed);
+        m_camera.Translate(0.0f, 0.0f, speed / 2.0f);
     }
 
     //Move Right and Left
     if (GetAsyncKeyState('Q')) {
-        m_camera.Translate(speed, 0.0f, 0.0f);
+        m_camera.Translate(speed / 2.0f, 0.0f, 0.0f);
     }
     else if (GetAsyncKeyState('D')) {
-        m_camera.Translate(-speed, 0.0f, 0.0f);
+        m_camera.Translate(-speed / 2.0f, 0.0f, 0.0f);
     }
 
     //Move forward/Backward
     if (GetAsyncKeyState('P')) {
-        m_camera.Translate(0.0f, -speed, 0.0f);
+        m_camera.Translate(0.0f, -speed / 2.0f, 0.0f);
     }
     else if (GetAsyncKeyState('M')) {
-        m_camera.Translate(0.0f, speed, 0.0f);
+        m_camera.Translate(0.0f, speed / 2.0f, 0.0f);
     }
 
     //Rotate Y axis
@@ -680,13 +680,13 @@ void Update()
     UpdateCamera();
 
 
-    m_gameObject1.Rotate(0.0f, 0.0f, 1.0f, 0.0001f);
+/*    m_gameObject1.Rotate(0.0f, 0.0f, 1.0f, 0.0001f);
     m_gameObject1.Rotate(0.0f, 1.0f, 0.0f, 0.0002f);
     m_gameObject1.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);
 
     m_gameObject2.Rotate(0.0f, 0.0f, 1.0f, 0.0001f);
     m_gameObject2.Rotate(0.0f, 1.0f, 0.0f, 0.0002f);
-    m_gameObject2.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);   
+    m_gameObject2.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);   */
 }
 
 void UpdatePipeline()

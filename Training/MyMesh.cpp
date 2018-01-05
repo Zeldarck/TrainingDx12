@@ -34,7 +34,7 @@ void MyMesh::SetObj(std::string a_obj)
 }
 
 bool MyMesh::HaveATexture() {
-    return m_mesh->MeshMaterial.map_Ka.size() > 0;
+    return m_mesh->MeshMaterial.map_Kd.size() > 0;
 }
 
 void MyMesh::Draw(ID3D12GraphicsCommandList * a_commandList) {
@@ -74,7 +74,8 @@ void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_co
     for (int j = 0; j < m_mesh->Vertices.size(); j++)
     {
         vList[j] = { m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z
-            , (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX 
+          //  , (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX
+            , m_mesh->MeshMaterial.Kd.X,  m_mesh->MeshMaterial.Kd.Y,  m_mesh->MeshMaterial.Kd.Z, 1.0f
             ,m_mesh->Vertices[j].TextureCoordinate.X,m_mesh->Vertices[j].TextureCoordinate.Y };
     }
 
@@ -180,6 +181,18 @@ void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_co
 
     PushTextureOnGPU(a_device, a_commandList);
 }
+std::wstring s2ws(const std::string& s)
+{
+    int len;
+    int slength = (int)s.length() + 1;
+    len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+    wchar_t* buf = new wchar_t[len];
+    MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+    std::wstring r(buf);
+    delete[] buf;
+    return r;
+}
+
 
 void MyMesh::PushTextureOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList)
 {
@@ -191,7 +204,7 @@ void MyMesh::PushTextureOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList
     D3D12_RESOURCE_DESC textureDesc;
     int imageBytesPerRow;
     BYTE* imageData;
-    int imageSize = LoadImageDataFromFile(&imageData, textureDesc, L"cube.jpg", imageBytesPerRow);
+    int imageSize = LoadImageDataFromFile(&imageData, textureDesc, s2ws("Assets/" + m_mesh->MeshMaterial.map_Kd).c_str(), imageBytesPerRow);
 
     // create a default heap where the upload heap will copy its contents into (contents being the texture)
     HRESULT hr = a_device->CreateCommittedResource(
