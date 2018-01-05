@@ -6,7 +6,8 @@
 
 
 //Look les placement new
-
+// look les uniqueptr
+//ne pas release les trucs de gpu pose des bleme de secu
 
 class PSOFactory
 {
