@@ -122,7 +122,5 @@ float speed = 0.0005f;
 
 bool add_stickMan = false;
 
-PSO* pso;
-
 
 

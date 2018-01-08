@@ -1,5 +1,6 @@
 #include "MyMesh.h"
 #include "Util.h"
+#include "PSOFactory.h"
 
 std::vector<MyMesh*> MyMesh::getChildren()
 {
@@ -36,6 +37,20 @@ bool MyMesh::HaveATexture() {
     return m_mesh->MeshMaterial.map_Kd.size() > 0;
 }
 
+bool MyMesh::HaveMesh() {
+    return m_mesh ? true : false;
+}
+
+void MyMesh::SetPipeline(ID3D12GraphicsCommandList * a_commandList) {
+    if (!m_mesh) {
+        return;
+    }
+
+    a_commandList->SetPipelineState(m_pso->GetPipelineStateObject());
+    a_commandList->SetGraphicsRootSignature(m_pso->GetRootSignature()); // set the root signature
+}
+
+
 void MyMesh::Draw(ID3D12GraphicsCommandList * a_commandList) {
 
     if (!m_mesh) {
@@ -68,6 +83,16 @@ void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_co
     if (!m_mesh) {
         return;
     }
+
+    if (HaveATexture()) {
+        m_pso = PSOFactory::GetInstance(a_device)->CreatePSO(PSO_FLAG_TEXTURE);
+    }
+    else {
+        m_pso = PSOFactory::GetInstance(a_device)->CreatePSO(PSO_FLAG_TEXTURE);
+    }
+
+
+
     Vertex *vList = new Vertex[m_mesh->Vertices.size()];
 
     for (int j = 0; j < m_mesh->Vertices.size(); j++)

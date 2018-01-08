@@ -353,9 +353,10 @@ bool InitD3D()
 	}
 
 
+    ///////TO DELETE WHEN GOT A CLASS TO HANDLE CREATION OF D3 OBJECTS
+    PSOFactory::GetInstance(device, sampleDesc);
+    ///////////////////////////////////////////////////////////////////
 
-
-    pso = PSOFactory::GetInstance(device, sampleDesc)->CreatePSO(PSO_FLAG_FULLCOLOR | PSO_FLAG_TEXTURE);
 
     m_cubeMesh.SetObj("Assets/soldier.obj");
     m_TorusMesh.SetObj("Assets/cube.obj");
@@ -538,7 +539,7 @@ void UpdatePipeline()
 	// but in this tutorial we are only clearing the rtv, and do not actually need
 	// anything but an initial default pipeline, which is what we get by setting
 	// the second parameter to NULL
-	hr = commandList->Reset(commandAllocator[frameIndex], pso->GetPipelineStateObject());
+	hr = commandList->Reset(commandAllocator[frameIndex], nullptr);
 	if (FAILED(hr))
 	{
 		Running = false;
@@ -555,18 +556,15 @@ void UpdatePipeline()
 
 	// set the render target for the output merger stage (the output of the pipeline)
 	commandList->OMSetRenderTargets(1, &rtvHandle, FALSE,&dsvHandle);
-
 	// Clear the render target by using the ClearRenderTargetView command
 	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
 	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	// draw triangle
-	commandList->SetGraphicsRootSignature(pso->GetRootSignature()); // set the root signature
 	commandList->RSSetViewports(1, &viewport); // set the viewports
 	commandList->RSSetScissorRects(1, &scissorRect); // set the scissor rects
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
-
 
 
     m_scene.Draw( commandList, frameIndex, &m_camera);

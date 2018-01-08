@@ -40,6 +40,8 @@ public:
 
     static PSOFactory * GetInstance(ID3D12Device * a_device, DXGI_SAMPLE_DESC a_sampleDesc);
 
+   static PSOFactory * GetInstance(ID3D12Device * a_device);
+
     static void DeleteInstance();
     static void ResetInstance();
 

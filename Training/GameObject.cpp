@@ -39,7 +39,9 @@ void GameObject::Draw(ID3D12GraphicsCommandList * a_commandList, int a_frameInde
     DirectX::XMMATRIX worldMatrix = GetLocalWorldMatrix() * a_transformationMatrix;
 
     //If we have a mesh
-    if (m_mesh) {
+    if (m_mesh && m_mesh->HaveMesh()) {
+        m_mesh->SetPipeline(a_commandList);
+
         DirectX::XMMATRIX wvpMat = worldMatrix *  a_camera->GetVPMatrix(); // create wvp matrix
 
         DirectX::XMMATRIX transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu

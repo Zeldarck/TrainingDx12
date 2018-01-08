@@ -3,7 +3,7 @@
 #include "d3dx12.h"
 #include <DirectXMath.h>
 #include <wincodec.h>
-
+#include "PSO.h"
 
 struct Vertex {
     Vertex() : pos(0, 0, 0), color(0, 0, 0, 0),texCoord(0,0) {};
@@ -30,7 +30,7 @@ class MyMesh
         ID3D12DescriptorHeap* m_mainDescriptorHeap = nullptr;
         ID3D12Resource* m_textureBufferUploadHeap = nullptr;
         ID3D12Resource* m_textureBuffer = nullptr;
-
+        PSO* m_pso = nullptr;
     public:
 
 
@@ -43,6 +43,8 @@ class MyMesh
 
         void SetObj(std::string a_obj);
         bool HaveATexture();
+        bool HaveMesh();
+        void SetPipeline(ID3D12GraphicsCommandList * a_commandList);
         void Draw(ID3D12GraphicsCommandList * a_commandList);
         void PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList);
         void PushTextureOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList);

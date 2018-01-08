@@ -17,6 +17,14 @@ PSOFactory* PSOFactory::GetInstance(ID3D12Device * a_device, DXGI_SAMPLE_DESC a_
     return INSTANCE;
 }
 
+PSOFactory* PSOFactory::GetInstance(ID3D12Device * a_device) {
+    if (!INSTANCE) {
+        INSTANCE = new PSOFactory();
+        INSTANCE->m_device = a_device;
+    }
+    return INSTANCE;
+}
+
 //call depuis exit de main
 void PSOFactory::DeleteInstance()
 {
