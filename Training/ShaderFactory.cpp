@@ -30,7 +30,8 @@ Shader * ShaderFactory::CreateShader(std::string a_path, SHADER_TYPE a_type)
 //call depuis exit de main
 void ShaderFactory::DeleteInstance()
 {
-    delete INSTANCE;
+    if (INSTANCE)
+        delete INSTANCE;
 }
 
 

@@ -23,7 +23,8 @@ PSOFactory* PSOFactory::GetInstance(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_
 //call depuis exit de main
 void PSOFactory::DeleteInstance()
 {
-    delete INSTANCE;
+    if (INSTANCE)
+        delete INSTANCE;
 }
 
 void PSOFactory::ResetInstance()

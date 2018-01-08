@@ -22,6 +22,7 @@
 #include "ShaderFactory.h"
 #include "RootSignature.h"
 #include "Util.h"
+#include "RootSignatureFactory.h"
 
 
 // Handle to the window
