@@ -19,12 +19,13 @@ class PSO
 protected:
     D3D12_GRAPHICS_PIPELINE_STATE_DESC m_psoDesc;
     ID3D12PipelineState* m_pipelineStateObject = nullptr; // pso containing a pipeline state
-
+    ID3D12RootSignature* m_rootSignature = nullptr;
 public:
 
     ID3D12PipelineState* GetPipelineStateObject();
 
     PSO(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_DESC a_inputLayoutDesc, D3D12_SHADER_BYTECODE a_pixelShaderBytecode, D3D12_SHADER_BYTECODE a_vertexShaderBytecode, ID3D12RootSignature * a_rootSignature, DXGI_SAMPLE_DESC a_sampleDesc);
+    ID3D12RootSignature * GetRootSignature();
     ~PSO();
 };
 

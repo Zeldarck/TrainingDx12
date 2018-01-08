@@ -100,7 +100,6 @@ void Cleanup(); // release com ojects and clean up memory
 void WaitForPreviousFrame(); // wait until gpu is finished with command list
 
 
-RootSignature* rootSignature; // root signature defines data shaders will access
 
 D3D12_VIEWPORT viewport; // area that output from rasterizer will be stretched to.
 

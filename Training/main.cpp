@@ -352,8 +352,6 @@ bool InitD3D()
 		return false;
 	}
 
-	// create root signature
-    rootSignature = RootSignatureFactory::GetInstance(device)->CreateRootSignature(ROOT_SIGNATURE_FLAG_TEXTURE);
 
     Shader* shaderVertex = ShaderFactory::GetInstance()->CreateShader("TextureVertexShader.hlsl", SHADER_TYPE_VERTEX);
     Shader* shaderPixel = ShaderFactory::GetInstance()->CreateShader("TexturePixelShader.hlsl", SHADER_TYPE_PIXEL);
@@ -374,7 +372,7 @@ bool InitD3D()
 	inputLayoutDesc.pInputElementDescs = inputLayout;
 
 
-    pso = PSOFactory::GetInstance(device, inputLayoutDesc, *shaderPixel->GetShaderByteCode(), *shaderVertex->GetShaderByteCode(), rootSignature->GetRootSignature(), sampleDesc)->CreatePSO(PSO_FLAGS_FULLCOLOR);
+    pso = PSOFactory::GetInstance(device, inputLayoutDesc, *shaderPixel->GetShaderByteCode(), *shaderVertex->GetShaderByteCode(), sampleDesc)->CreatePSO(PSO_FLAGS_FULLCOLOR | PSO_FLAG_TEXTURE);
 
     m_cubeMesh.SetObj("Assets/soldier.obj");
     m_TorusMesh.SetObj("Assets/cube.obj");
@@ -581,7 +579,7 @@ void UpdatePipeline()
     commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	// draw triangle
-	commandList->SetGraphicsRootSignature(rootSignature->GetRootSignature()); // set the root signature
+	commandList->SetGraphicsRootSignature(pso->GetRootSignature()); // set the root signature
 	commandList->RSSetViewports(1, &viewport); // set the viewports
 	commandList->RSSetScissorRects(1, &scissorRect); // set the scissor rects
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology

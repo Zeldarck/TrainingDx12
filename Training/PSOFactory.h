@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include "d3dx12.h"
 #include "PSO.h"
+#include "RootSignatureFactory.h"
 
 
 
@@ -18,12 +19,13 @@ private:
     static PSOFactory* INSTANCE;
     std::unordered_map<PSO_FLAGS, PSO*> m_psoMap;
     ID3D12Device * m_device;
+    RootSignature* MakeRootSignature(PSO_FLAGS a_flag);
+
 
 public:
     D3D12_INPUT_LAYOUT_DESC m_inputLayoutDesc;
     D3D12_SHADER_BYTECODE m_pixelShaderBytecode;
     D3D12_SHADER_BYTECODE m_vertexShaderBytecode;
-    ID3D12RootSignature* m_rootSignature;
     DXGI_SAMPLE_DESC m_sampleDesc;
     
 
@@ -33,7 +35,7 @@ public:
 
 
 
-    static PSOFactory * GetInstance(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_DESC a_inputLayoutDesc, D3D12_SHADER_BYTECODE a_pixelShaderBytecode, D3D12_SHADER_BYTECODE a_vertexShaderBytecode, ID3D12RootSignature * a_rootSignature, DXGI_SAMPLE_DESC a_sampleDesc);
+    static PSOFactory * GetInstance(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_DESC a_inputLayoutDesc, D3D12_SHADER_BYTECODE a_pixelShaderBytecode, D3D12_SHADER_BYTECODE a_vertexShaderBytecode, DXGI_SAMPLE_DESC a_sampleDesc);
 
     static void DeleteInstance();
     static void ResetInstance();
