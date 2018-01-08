@@ -19,7 +19,7 @@ D3D12_INDEX_BUFFER_VIEW * MyMesh::GetIndexBufferView()
 
 void MyMesh::SetObj(std::string a_obj)
 {
-    objl::Loader* Loader = new objl::Loader();
+    Loader = new objl::Loader();
 
     bool loadout = Loader->LoadFile(a_obj);
     if (Loader->LoadedMeshes.size() > 1) {
@@ -349,6 +349,7 @@ MyMesh::~MyMesh()
     for (int i = 0; i < m_children.size(); ++i) {
         delete m_children[i];
     }
+    delete Loader;
 }
 
 

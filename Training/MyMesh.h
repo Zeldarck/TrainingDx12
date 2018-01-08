@@ -39,6 +39,7 @@ class MyMesh
         ID3D12Resource* m_textureBufferUploadHeap = nullptr;
         ID3D12Resource* m_textureBuffer = nullptr;
         PSO* m_pso = nullptr;
+        objl::Loader* Loader = nullptr;
     public:
 
 
