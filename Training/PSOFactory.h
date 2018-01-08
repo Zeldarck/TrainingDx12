@@ -30,13 +30,7 @@ private:
 
 public:
     DXGI_SAMPLE_DESC m_sampleDesc;
-    
-
-
-
-   // static PSOFactory * GetInstance();
-
-
+   
 
     static PSOFactory * GetInstance(ID3D12Device * a_device, DXGI_SAMPLE_DESC a_sampleDesc);
 

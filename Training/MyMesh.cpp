@@ -73,6 +73,8 @@ void MyMesh::Draw(ID3D12GraphicsCommandList * a_commandList) {
     a_commandList->DrawIndexedInstanced(GetCountIndex(), 1, 0, 0, 0);
 }
 
+
+
 void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_commandList)
 {
 
@@ -88,22 +90,153 @@ void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_co
         m_pso = PSOFactory::GetInstance(a_device)->CreatePSO(PSO_FLAG_TEXTURE);
     }
     else {
-        m_pso = PSOFactory::GetInstance(a_device)->CreatePSO(PSO_FLAG_TEXTURE);
+        m_pso = PSOFactory::GetInstance(a_device)->CreatePSO(PSO_FLAG_FULLCOLOR);
+    }
+    //////////////
+    if (HaveATexture()) {
+        VertexTexture * vList = nullptr;
+        vList = new VertexTexture[m_mesh->Vertices.size()];
+
+        for (int j = 0; j < m_mesh->Vertices.size(); j++)
+        {
+                vList[j] = VertexTexture(m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z
+                    , m_mesh->MeshMaterial.Kd.X, m_mesh->MeshMaterial.Kd.Y, m_mesh->MeshMaterial.Kd.Z, 1.0f
+                    , m_mesh->Vertices[j].TextureCoordinate.X, m_mesh->Vertices[j].TextureCoordinate.Y);
+            
+        }
+        m_vBufferSize = sizeof(VertexTexture)  * m_mesh->Vertices.size();
+
+
+
+
+        a_device->CreateCommittedResource(
+            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
+            D3D12_HEAP_FLAG_NONE, // no flags
+            &CD3DX12_RESOURCE_DESC::Buffer(m_vBufferSize), // resource description for a buffer
+            D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
+                                            // from the upload heap to this heap
+            nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
+            IID_PPV_ARGS(&m_vertexBuffer));
+
+        // we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
+        m_vertexBuffer->SetName(L"Vertex Buffer Resource Heap");
+
+
+        // create upload heap
+        // upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
+        // We will upload the vertex buffer using this heap to the default heap
+        ID3D12Resource* vBufferUploadHeap;
+        a_device->CreateCommittedResource(
+            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
+            D3D12_HEAP_FLAG_NONE, // no flags
+            &CD3DX12_RESOURCE_DESC::Buffer(m_vBufferSize), // resource description for a buffer
+            D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
+            nullptr,
+            IID_PPV_ARGS(&vBufferUploadHeap));
+        vBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
+
+        // store vertex buffer in upload heap
+        D3D12_SUBRESOURCE_DATA vertexData = {};
+        vertexData.pData = reinterpret_cast<BYTE*>(vList); // pointer to our vertex array
+        vertexData.RowPitch = m_vBufferSize; // size of all our triangle vertex data
+        vertexData.SlicePitch = m_vBufferSize; // also the size of our triangle vertex data
+
+                                               // we are now creating a command with the command list to copy the data from
+                                               // the upload heap to the default heap
+        UpdateSubresources(a_commandList, m_vertexBuffer, vBufferUploadHeap, 0, 0, 1, &vertexData);
+
+        // transition the vertex buffer data from copy destination state to vertex buffer state
+        a_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
+
+    }
+    else {
+        Vertex* vList = nullptr;
+
+        vList = new Vertex[m_mesh->Vertices.size()];
+
+
+        for (int j = 0; j < m_mesh->Vertices.size(); j++)
+        {
+                vList[j] = { m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z
+                    , m_mesh->MeshMaterial.Kd.X,  m_mesh->MeshMaterial.Kd.Y,  m_mesh->MeshMaterial.Kd.Z, 1.0f };
+        }
+        m_vBufferSize = sizeof(Vertex) * m_mesh->Vertices.size();
+
+
+        a_device->CreateCommittedResource(
+            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
+            D3D12_HEAP_FLAG_NONE, // no flags
+            &CD3DX12_RESOURCE_DESC::Buffer(m_vBufferSize), // resource description for a buffer
+            D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
+                                            // from the upload heap to this heap
+            nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
+            IID_PPV_ARGS(&m_vertexBuffer));
+
+        // we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
+        m_vertexBuffer->SetName(L"Vertex Buffer Resource Heap");
+
+
+        // create upload heap
+        // upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
+        // We will upload the vertex buffer using this heap to the default heap
+        ID3D12Resource* vBufferUploadHeap;
+        a_device->CreateCommittedResource(
+            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
+            D3D12_HEAP_FLAG_NONE, // no flags
+            &CD3DX12_RESOURCE_DESC::Buffer(m_vBufferSize), // resource description for a buffer
+            D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
+            nullptr,
+            IID_PPV_ARGS(&vBufferUploadHeap));
+        vBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
+
+        // store vertex buffer in upload heap
+        D3D12_SUBRESOURCE_DATA vertexData = {};
+        vertexData.pData = reinterpret_cast<BYTE*>(vList); // pointer to our vertex array
+        vertexData.RowPitch = m_vBufferSize; // size of all our triangle vertex data
+        vertexData.SlicePitch = m_vBufferSize; // also the size of our triangle vertex data
+
+                                               // we are now creating a command with the command list to copy the data from
+                                               // the upload heap to the default heap
+        UpdateSubresources(a_commandList, m_vertexBuffer, vBufferUploadHeap, 0, 0, 1, &vertexData);
+
+        // transition the vertex buffer data from copy destination state to vertex buffer state
+        a_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
+
+
     }
 
 
 
-    Vertex *vList = new Vertex[m_mesh->Vertices.size()];
+    ////////////////
+ /*   if (HaveATexture()) {
+        vList = new VertexTexture[m_mesh->Vertices.size()];
+
+    }
+    else {
+        vList = new Vertex[m_mesh->Vertices.size()];
+    }
 
     for (int j = 0; j < m_mesh->Vertices.size(); j++)
     {
-        vList[j] = { m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z
-          //  , (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX
-            , m_mesh->MeshMaterial.Kd.X,  m_mesh->MeshMaterial.Kd.Y,  m_mesh->MeshMaterial.Kd.Z, 1.0f
-            ,m_mesh->Vertices[j].TextureCoordinate.X,m_mesh->Vertices[j].TextureCoordinate.Y };
+        if (HaveATexture()) {
+            vList[j] = VertexTexture(m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z
+                  , m_mesh->MeshMaterial.Kd.X,  m_mesh->MeshMaterial.Kd.Y,  m_mesh->MeshMaterial.Kd.Z, 1.0f
+                  ,m_mesh->Vertices[j].TextureCoordinate.X,m_mesh->Vertices[j].TextureCoordinate.Y);
+        }
+        else {
+            vList[j] = { m_mesh->Vertices[j].Position.X, m_mesh->Vertices[j].Position.Y, m_mesh->Vertices[j].Position.Z
+                , m_mesh->MeshMaterial.Kd.X,  m_mesh->MeshMaterial.Kd.Y,  m_mesh->MeshMaterial.Kd.Z, 1.0f };
+        }
     }
 
-    m_vBufferSize = sizeof(Vertex) * m_mesh->Vertices.size();
+    if (HaveATexture()) {
+       
+        m_vBufferSize = sizeof(VertexTexture)  * m_mesh->Vertices.size();
+    }
+    else {
+        m_vBufferSize = sizeof(Vertex) * m_mesh->Vertices.size();
+
+    }
 
 
     DWORD *vIndices = new DWORD[m_mesh->Indices.size()];
@@ -154,6 +287,15 @@ void MyMesh::PushOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList * a_co
 
 
 
+    */
+
+
+    DWORD *vIndices = new DWORD[m_mesh->Indices.size()];
+    for (int j = 0; j < m_mesh->Indices.size(); j++) {
+        vIndices[j] = m_mesh->Indices[j];
+    }
+
+    m_vIndexSize = sizeof(DWORD) * m_mesh->Indices.size();
 
 
     // create default heap
@@ -291,7 +433,13 @@ void MyMesh::PushTextureOnGPU(ID3D12Device * a_device, ID3D12GraphicsCommandList
 void MyMesh::SetBufferVertexView()
 {
     m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-    m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+    if (HaveATexture()) {
+        m_vertexBufferView.StrideInBytes = sizeof(VertexTexture);
+    }
+    else {
+        m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+    }
+
     m_vertexBufferView.SizeInBytes = m_vBufferSize;
 }
 
