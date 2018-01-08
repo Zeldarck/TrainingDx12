@@ -353,9 +353,6 @@ bool InitD3D()
 	}
 
 
-    Shader* shaderVertex = ShaderFactory::GetInstance()->CreateShader("TextureVertexShader.hlsl", SHADER_TYPE_VERTEX);
-    Shader* shaderPixel = ShaderFactory::GetInstance()->CreateShader("TexturePixelShader.hlsl", SHADER_TYPE_PIXEL);
-
 
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 	{
@@ -372,7 +369,7 @@ bool InitD3D()
 	inputLayoutDesc.pInputElementDescs = inputLayout;
 
 
-    pso = PSOFactory::GetInstance(device, inputLayoutDesc, *shaderPixel->GetShaderByteCode(), *shaderVertex->GetShaderByteCode(), sampleDesc)->CreatePSO(PSO_FLAGS_FULLCOLOR | PSO_FLAG_TEXTURE);
+    pso = PSOFactory::GetInstance(device, inputLayoutDesc, sampleDesc)->CreatePSO(PSO_FLAG_FULLCOLOR | PSO_FLAG_TEXTURE);
 
     m_cubeMesh.SetObj("Assets/soldier.obj");
     m_TorusMesh.SetObj("Assets/cube.obj");
