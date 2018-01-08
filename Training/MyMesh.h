@@ -10,17 +10,17 @@ struct Vertex {
     Vertex(float x, float y, float z, float r, float g, float b, float a) : pos(x, y, z), color(r, g, b, z) {}
     DirectX::XMFLOAT3 pos;
     DirectX::XMFLOAT4 color;
+
 };
 
 
-struct VertexTexture {
-    VertexTexture() : pos(0, 0, 0), color(0, 0, 0, 0),texCoord(0,0) {};
-    VertexTexture(float x, float y, float z, float r, float g, float b, float a, float u, float v) : pos(x, y, z), color(r, g, b, z), texCoord(u,v) {}
-    DirectX::XMFLOAT3 pos;
-    DirectX::XMFLOAT4 color;
+struct VertexTexture : public Vertex{
+    VertexTexture() : Vertex(),texCoord(0,0) {};
+    VertexTexture(float x, float y, float z, float r, float g, float b, float a, float u, float v) : Vertex(x, y, z, r, g, b, z), texCoord(u,v) {}
     DirectX::XMFLOAT2 texCoord;
-
 };
+
+
 
 class MyMesh
 {
