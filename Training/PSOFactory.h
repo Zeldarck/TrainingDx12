@@ -25,9 +25,10 @@ private:
 
     D3D12_SHADER_BYTECODE * MakeVertexShader(PSO_FLAGS a_flag);
 
+    D3D12_INPUT_LAYOUT_DESC * MakeInputLayoutDesc(PSO_FLAGS a_flag);
+
 
 public:
-    D3D12_INPUT_LAYOUT_DESC m_inputLayoutDesc;
     DXGI_SAMPLE_DESC m_sampleDesc;
     
 
@@ -37,7 +38,7 @@ public:
 
 
 
-    static PSOFactory * GetInstance(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_DESC a_inputLayoutDesc, DXGI_SAMPLE_DESC a_sampleDesc);
+    static PSOFactory * GetInstance(ID3D12Device * a_device, DXGI_SAMPLE_DESC a_sampleDesc);
 
     static void DeleteInstance();
     static void ResetInstance();

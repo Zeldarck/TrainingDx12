@@ -7,10 +7,10 @@ ID3D12PipelineState * PSO::GetPipelineStateObject()
     return m_pipelineStateObject;
 }
 
-PSO::PSO(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_DESC a_inputLayoutDesc, D3D12_SHADER_BYTECODE* a_pixelShaderBytecode, D3D12_SHADER_BYTECODE* a_vertexShaderBytecode, ID3D12RootSignature* a_rootSignature, DXGI_SAMPLE_DESC a_sampleDesc)
+PSO::PSO(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_DESC * a_inputLayoutDesc, D3D12_SHADER_BYTECODE* a_pixelShaderBytecode, D3D12_SHADER_BYTECODE* a_vertexShaderBytecode, ID3D12RootSignature* a_rootSignature, DXGI_SAMPLE_DESC a_sampleDesc)
 {
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; // a structure to define a pso
-    psoDesc.InputLayout = a_inputLayoutDesc; // the structure describing our input layout
+    psoDesc.InputLayout = *a_inputLayoutDesc; // the structure describing our input layout
     psoDesc.pRootSignature = a_rootSignature; // the root signature that describes the input data this pso needs
     psoDesc.VS = *a_vertexShaderBytecode; // structure describing where to find the vertex shader bytecode and how large it is
     psoDesc.PS = *a_pixelShaderBytecode; // same as VS but for pixel shader

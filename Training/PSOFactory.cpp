@@ -5,11 +5,10 @@ PSOFactory* PSOFactory::INSTANCE = nullptr;
 
 
 
-PSOFactory* PSOFactory::GetInstance(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_DESC a_inputLayoutDesc, DXGI_SAMPLE_DESC a_sampleDesc) {
+PSOFactory* PSOFactory::GetInstance(ID3D12Device * a_device, DXGI_SAMPLE_DESC a_sampleDesc) {
     if (!INSTANCE) {
         INSTANCE = new PSOFactory();
         INSTANCE->m_device = a_device;
-        INSTANCE->m_inputLayoutDesc = a_inputLayoutDesc;
         INSTANCE->m_sampleDesc = a_sampleDesc;
 
 
@@ -35,7 +34,7 @@ PSO * PSOFactory::CreatePSO(PSO_FLAGS a_flag)
 {
     PSO* output = m_psoMap[a_flag];
     if (!output) {
-        output = new PSO(m_device, m_inputLayoutDesc, MakePixelShader(a_flag), MakeVertexShader(a_flag), MakeRootSignature(a_flag), m_sampleDesc);
+        output = new PSO(m_device, MakeInputLayoutDesc(a_flag), MakePixelShader(a_flag), MakeVertexShader(a_flag), MakeRootSignature(a_flag), m_sampleDesc);
         m_psoMap[a_flag] =  output;
     }
     return output;
@@ -83,4 +82,30 @@ D3D12_SHADER_BYTECODE * PSOFactory::MakeVertexShader(PSO_FLAGS a_flag)
     }
 
     return output;
+}
+
+D3D12_INPUT_LAYOUT_DESC * PSOFactory::MakeInputLayoutDesc(PSO_FLAGS a_flag)
+{
+    D3D12_INPUT_ELEMENT_DESC * inputLayout = nullptr;
+    D3D12_INPUT_LAYOUT_DESC * inputLayoutDesc = new D3D12_INPUT_LAYOUT_DESC();;
+
+    if (a_flag & PSO_FLAG_TEXTURE) {
+        inputLayout = new D3D12_INPUT_ELEMENT_DESC[3];
+            
+        inputLayout[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        inputLayout[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT , D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        inputLayout[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT  , D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        inputLayoutDesc->NumElements = 3;
+    }
+    else if (a_flag & PSO_FLAG_FULLCOLOR) {
+        inputLayout = new D3D12_INPUT_ELEMENT_DESC[2];
+        inputLayout[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        inputLayout[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT , D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        inputLayoutDesc->NumElements = 2;
+
+    }
+    inputLayoutDesc->pInputElementDescs = inputLayout;
+
+    return inputLayoutDesc;
+
 }

@@ -354,22 +354,8 @@ bool InitD3D()
 
 
 
-	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT , D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT  , D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	};
 
-	// fill out an input layout description structure
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc = {};
-
-	// we can get the number of elements in an array by "sizeof(array) / sizeof(arrayElementType)"
-	inputLayoutDesc.NumElements = sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC);
-	inputLayoutDesc.pInputElementDescs = inputLayout;
-
-
-    pso = PSOFactory::GetInstance(device, inputLayoutDesc, sampleDesc)->CreatePSO(PSO_FLAG_FULLCOLOR | PSO_FLAG_TEXTURE);
+    pso = PSOFactory::GetInstance(device, sampleDesc)->CreatePSO(PSO_FLAG_FULLCOLOR | PSO_FLAG_TEXTURE);
 
     m_cubeMesh.SetObj("Assets/soldier.obj");
     m_TorusMesh.SetObj("Assets/cube.obj");
