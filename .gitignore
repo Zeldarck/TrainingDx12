@@ -76,6 +76,8 @@ artifacts/
 *.svclog
 *.scc
 
+!Training/Assets/*.obj
+
 # Chutzpah Test files
 _Chutzpah*
 
