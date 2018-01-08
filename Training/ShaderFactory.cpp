@@ -27,6 +27,13 @@ Shader * ShaderFactory::CreateShader(std::string a_path, SHADER_TYPE a_type)
     return output;
 }
 
+//call depuis exit de main
+void ShaderFactory::DeleteInstance()
+{
+    delete INSTANCE;
+}
+
+
 ShaderFactory::~ShaderFactory()
 {
 }

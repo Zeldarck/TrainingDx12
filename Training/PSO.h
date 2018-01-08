@@ -18,7 +18,7 @@ class PSO
 
 protected:
     D3D12_GRAPHICS_PIPELINE_STATE_DESC m_psoDesc;
-    ID3D12PipelineState* m_pipelineStateObject; // pso containing a pipeline state
+    ID3D12PipelineState* m_pipelineStateObject = nullptr; // pso containing a pipeline state
 
 public:
 

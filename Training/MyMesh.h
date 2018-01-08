@@ -17,19 +17,19 @@ struct Vertex {
 class MyMesh
 {
     protected:
-        ID3D12Resource* vertexBuffer;
-        ID3D12Resource* indexBuffer;
-        D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-        D3D12_INDEX_BUFFER_VIEW indexBufferView;
-        int vBufferSize;
-        int vIndexSize;
+        ID3D12Resource* m_vertexBuffer = nullptr;
+        ID3D12Resource* m_indexBuffer = nullptr;
+        D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+        D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+        int m_vBufferSize;
+        int m_vIndexSize;
         objl::Mesh* m_mesh = nullptr;
         std::vector<MyMesh*> m_children;
         void SetBufferVertexView();
         void SetBufferIndexView();
-        ID3D12DescriptorHeap* mainDescriptorHeap;
-        ID3D12Resource* textureBufferUploadHeap;
-        ID3D12Resource* textureBuffer;
+        ID3D12DescriptorHeap* m_mainDescriptorHeap = nullptr;
+        ID3D12Resource* m_textureBufferUploadHeap = nullptr;
+        ID3D12Resource* m_textureBuffer = nullptr;
 
     public:
 

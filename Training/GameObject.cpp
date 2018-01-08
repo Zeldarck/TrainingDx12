@@ -3,6 +3,7 @@
 #include <D3Dcompiler.h>
 #include "GameObject.h"
 #include "Camera.h"
+#include "Util.h"
 
 void GameObject::Rotate(float a_x, float a_y, float a_z, float a_value)
 {
@@ -132,6 +133,14 @@ GameObject::GameObject(DirectX::XMFLOAT4 a_position, DirectX::XMFLOAT4 a_target,
 
 GameObject::~GameObject()
 {
-    //if(m_parent)
-     // delete m_parent;
+    for (int i = 0; i < m_frameBufferCount; ++i) {
+        if (constantBufferUploadHeaps) {
+            SAFE_RELEASE(constantBufferUploadHeaps[i]);
+        }
+    }
+    if(constantBufferUploadHeaps)
+        delete constantBufferUploadHeaps;
+    if (cbvGPUAddress)
+        delete cbvGPUAddress;
+
 }

@@ -1,5 +1,5 @@
 #include "PSO.h"
-
+#include "Util.h"
 
 
 ID3D12PipelineState * PSO::GetPipelineStateObject()
@@ -34,4 +34,5 @@ PSO::PSO(ID3D12Device * a_device, D3D12_INPUT_LAYOUT_DESC a_inputLayoutDesc, D3D
 
 PSO::~PSO()
 {
+    SAFE_RELEASE(m_pipelineStateObject);
 }

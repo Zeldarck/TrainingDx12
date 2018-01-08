@@ -11,11 +11,13 @@ private:
     static ShaderFactory* INSTANCE;
 
     std::unordered_map<std::string, Shader*> m_shaderMap;
+    ~ShaderFactory();
 
 public:
      static ShaderFactory* GetInstance();
      Shader* CreateShader(std::string a_path, SHADER_TYPE a_type);
 
-    ~ShaderFactory();
+     static void DeleteInstance();
+
 };
 

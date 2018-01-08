@@ -15,9 +15,9 @@ struct ConstantBufferObject {
 class GameObject
 {
     protected :
-        ID3D12Device * m_device;
-        ID3D12Resource** constantBufferUploadHeaps;
-        UINT8** cbvGPUAddress;
+        ID3D12Device * m_device = nullptr;
+        ID3D12Resource** constantBufferUploadHeaps = nullptr;
+        UINT8** cbvGPUAddress = nullptr;
         MyMesh* m_mesh = nullptr;
         GameObject* m_parent = nullptr;
         int m_frameBufferCount = 0;

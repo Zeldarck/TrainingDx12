@@ -1,5 +1,5 @@
 #include "RootSignature.h"
-
+#include "Util.h"
 
 
 
@@ -107,4 +107,5 @@ RootSignature::RootSignature(ID3D12Device* a_device, ROOT_SIGNATURE_FLAG a_flags
 
 RootSignature::~RootSignature()
 {
+    SAFE_RELEASE(m_rootSignature);
 }

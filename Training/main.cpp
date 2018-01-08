@@ -353,7 +353,7 @@ bool InitD3D()
 	}
 
 	// create root signature
-    rootSignature = new RootSignature(device,ROOT_SIGNATURE_FLAG_NONE);
+    rootSignature = new RootSignature(device,ROOT_SIGNATURE_FLAG_TEXTURE);
 
     Shader* shaderVertex = ShaderFactory::GetInstance()->CreateShader("TextureVertexShader.hlsl", SHADER_TYPE_VERTEX);
     Shader* shaderPixel = ShaderFactory::GetInstance()->CreateShader("TexturePixelShader.hlsl", SHADER_TYPE_PIXEL);
@@ -676,6 +676,8 @@ void Cleanup()
 		SAFE_RELEASE(commandAllocator[i]);
 		SAFE_RELEASE(fence[i]);
 	};
+    PSOFactory::DeleteInstance();
+    ShaderFactory::DeleteInstance();
 
 }
 

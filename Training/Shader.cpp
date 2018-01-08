@@ -57,4 +57,5 @@ Shader::Shader(std::string a_path, SHADER_TYPE a_type)
 
 Shader::~Shader()
 {
+    SAFE_RELEASE(m_shaderCompiled);
 }
