@@ -622,7 +622,7 @@ void Render()
 	}
 
 	// present the current backbuffer
-    hr = swapChain->Present(0, 0);
+    hr = swapChain->Present(1, 0);
 	if (FAILED(hr))
 	{
 		Running = false;
