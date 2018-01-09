@@ -99,3 +99,4 @@ bool add_stickMan = false;
 
 
 
+Window * m_window = nullptr;

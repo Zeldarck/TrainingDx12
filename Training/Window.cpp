@@ -3,8 +3,21 @@
 
 
 
+int Window::GetWidth()
+{
+    return m_width;
+}
+
+int Window::GetHeight()
+{
+    return m_height;
+}
+
 Window::Window(HINSTANCE a_hInstance, int a_nShowCmd, LPCTSTR WindowName /* = L"WindowName" */, LPCTSTR WindowTitle /* = L"WindowTitle" */, int a_width /* =800 */, int a_height /* = 600*/, bool a_fullScreen /*= false*/)
 {
+    m_width = a_width;
+    m_height = a_height;
+
     if (a_fullScreen)
     {
         HMONITOR hmon = MonitorFromWindow(m_hwnd,
@@ -73,15 +86,15 @@ void Window::Close()
     DestroyWindow(m_hwnd);
 }
 
-LRESULT CALLBACK Window::WndProc(HWND m_hwnd, UINT m_msg, WPARAM m_wParam, LPARAM m_lParam)
+LRESULT CALLBACK Window::WndProc(HWND a_hwnd, UINT a_msg, WPARAM a_wParam, LPARAM a_lParam)
 
 {
-    Window* window = reinterpret_cast<Window*>(GetWindowLongPtr(m_hwnd, GWLP_USERDATA));
+    Window* window = reinterpret_cast<Window*>(GetWindowLongPtr(a_hwnd, GWLP_USERDATA));
 
-    switch (m_msg)
+    switch (a_msg)
     {
         case WM_KEYDOWN:
-            if (m_wParam == VK_ESCAPE) {
+            if (a_wParam == VK_ESCAPE) {
                 if (MessageBox(0, L"Are you sure you want to exit?",
                     L"Really?", MB_YESNO | MB_ICONQUESTION) == IDYES)
                 {
@@ -99,10 +112,14 @@ LRESULT CALLBACK Window::WndProc(HWND m_hwnd, UINT m_msg, WPARAM m_wParam, LPARA
             return 0;
     }
 
-    return DefWindowProc(m_hwnd,
-        m_msg,
-        m_wParam,
-        m_lParam);
+    return DefWindowProc(a_hwnd,
+        a_msg,
+        a_wParam,
+        a_lParam);
+}
+
+HWND Window::GetHWND() {
+    return m_hwnd;
 }
 
 

@@ -8,7 +8,9 @@ int WINAPI WinMain(HINSTANCE hInstance,    //Main windows function
 
 {
 	// create the window
-	if (!InitializeWindow(hInstance, nShowCmd, FullScreen))
+    m_window = new Window(hInstance, nShowCmd);
+
+	if (!m_window)
 	{
 		MessageBox(0, L"Window Initialization - Failed",
 			L"Error", MB_OK);
@@ -60,36 +62,6 @@ void mainloop() {
 			Render(); // execute the command queue (rendering the scene is the result of the gpu executing the command lists)
 		}
 	}
-}
-
-LRESULT CALLBACK WndProc(HWND hwnd,
-	UINT msg,
-	WPARAM wParam,
-	LPARAM lParam)
-
-{
-	switch (msg)
-	{
-	case WM_KEYDOWN:
-		if (wParam == VK_ESCAPE) {
-			if (MessageBox(0, L"Are you sure you want to exit?",
-				L"Really?", MB_YESNO | MB_ICONQUESTION) == IDYES)
-			{
-				Running = false;
-				DestroyWindow(hwnd);
-			}
-		}
-		return 0;
-
-	case WM_DESTROY: // x button on top right corner of window was pressed
-		Running = false;
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd,
-		msg,
-		wParam,
-		lParam);
 }
 
 bool InitD3D()
@@ -169,8 +141,8 @@ bool InitD3D()
 	// -- Create the Swap Chain (double/tripple buffering) -- //
 
 	DXGI_MODE_DESC backBufferDesc = {}; // this is to describe our display mode
-	backBufferDesc.Width = 800; // buffer width
-	backBufferDesc.Height = 600; // buffer height
+	backBufferDesc.Width = m_window->GetWidth(); // buffer width
+	backBufferDesc.Height = m_window->GetHeight(); // buffer height
 	backBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the buffer (rgba 32 bits, 8 bits for each chanel)
 
 														// describe our multi-sampling. We are not multi-sampling, so we set the count to 1 (we need at least one sample of course)
@@ -183,7 +155,7 @@ bool InitD3D()
 	swapChainDesc.BufferDesc = backBufferDesc; // our back buffer description
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // this says the pipeline will render to this swap chain
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // dxgi will discard the buffer (data) after we call present
-	swapChainDesc.OutputWindow = hwnd; // handle to our window
+	swapChainDesc.OutputWindow = m_window->GetHWND(); // handle to our window
 	swapChainDesc.SampleDesc = sampleDesc; // our multi-sampling description
 	swapChainDesc.Windowed = !false; // set to true, then if in fullscreen must call SetFullScreenState with true for full screen to get uncapped fps
 
@@ -318,7 +290,7 @@ bool InitD3D()
     device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, Width, Height, 1, 0, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
+        &CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, m_window->GetWidth(), m_window->GetHeight() , 1, 0, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
         D3D12_RESOURCE_STATE_DEPTH_WRITE,
         &depthOptimizedClearValue,
         IID_PPV_ARGS(&depthStencilBuffer)
@@ -348,16 +320,16 @@ bool InitD3D()
 	// Fill out the Viewport
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = Width;
-	viewport.Height = Height;
+	viewport.Width = m_window->GetWidth();
+	viewport.Height = m_window->GetHeight();
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
 	// Fill out a scissor rect
 	scissorRect.left = 0;
 	scissorRect.top = 0;
-	scissorRect.right = Width;
-	scissorRect.bottom = Height;
+	scissorRect.right = m_window->GetWidth();
+	scissorRect.bottom = m_window->GetHeight();
 
     // build projection and view matrix
     DirectX::XMMATRIX tmpMat;
@@ -365,7 +337,7 @@ bool InitD3D()
     m_camera.SetNearZ(0.01f);
     m_camera.SetIsOrthographic(false);
     m_camera.SetFOV(45.0f);
-    m_camera.SetView(Width, Height);
+    m_camera.SetView(m_window->GetWidth(), m_window->GetHeight());
 
     m_gameObject1.Scale(0.05f, 0.05f, 0.05f);
     m_gameObject2.SetParent(&m_gameObject1);
