@@ -32,10 +32,10 @@ void PSOFactory::DeleteInstance()
         delete INSTANCE;
 }
 
-void PSOFactory::ResetInstance()
+PSOFactory* PSOFactory::ResetInstance(ID3D12Device * a_device)
 {
     DeleteInstance();
-    //GetInstance();
+    return GetInstance(a_device);
 }
 
 PSO * PSOFactory::CreatePSO(PSO_FLAGS a_flag)

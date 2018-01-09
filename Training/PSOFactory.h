@@ -37,7 +37,7 @@ public:
    static PSOFactory * GetInstance(ID3D12Device * a_device);
 
     static void DeleteInstance();
-    static void ResetInstance();
+    static PSOFactory * ResetInstance(ID3D12Device * a_device);
 
 
 
