@@ -14,10 +14,8 @@ int Window::GetHeight()
 }
 
 Window::Window(HINSTANCE a_hInstance, int a_nShowCmd, LPCTSTR WindowName /* = L"WindowName" */, LPCTSTR WindowTitle /* = L"WindowTitle" */, int a_width /* =800 */, int a_height /* = 600*/, bool a_fullScreen /*= false*/)
+    : m_width(a_width), m_height(a_height), m_fullScreen(a_fullScreen)
 {
-    m_width = a_width;
-    m_height = a_height;
-
     if (a_fullScreen)
     {
         HMONITOR hmon = MonitorFromWindow(m_hwnd,
@@ -120,6 +118,11 @@ LRESULT CALLBACK Window::WndProc(HWND a_hwnd, UINT a_msg, WPARAM a_wParam, LPARA
 
 HWND Window::GetHWND() {
     return m_hwnd;
+}
+
+bool Window::IsFullScreen()
+{
+    return m_fullScreen;
 }
 
 
