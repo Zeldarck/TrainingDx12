@@ -23,40 +23,15 @@
 #include "RootSignature.h"
 #include "Util.h"
 #include "RootSignatureFactory.h"
-
-
-// Handle to the window
-HWND hwnd = NULL;
-
-// name of the window (not the title)
-LPCTSTR WindowName = L"Training";
-
-// title of the window
-LPCTSTR WindowTitle = L"Training";
-
-// width and height of the window
-int Width = 800;
-int Height = 600;
-
-// is window full screen?
-bool FullScreen = false;
+#include "Window.h"
 
 // we will exit the program when this becomes false
 bool Running = true;
 
-// create a window
-bool InitializeWindow(HINSTANCE hInstance,
-	int ShowWnd,
-	bool fullscreen);
+
 
 // main application loop
 void mainloop();
-
-// callback function for windows messages
-LRESULT CALLBACK WndProc(HWND hWnd,
-	UINT msg,
-	WPARAM wParam,
-	LPARAM lParam);
 
 // direct3d stuff
 const int frameBufferCount = 3; // number of buffers we want, 2 for double buffering, 3 for tripple buffering

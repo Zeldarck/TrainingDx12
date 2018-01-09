@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-//using namespace DirectX; // we will be using the directxmath library
-
 
 int WINAPI WinMain(HINSTANCE hInstance,    //Main windows function
 	HINSTANCE hPrevInstance,
@@ -41,73 +39,6 @@ int WINAPI WinMain(HINSTANCE hInstance,    //Main windows function
 	return 0;
 }
 
-// create and show the window
-bool InitializeWindow(HINSTANCE hInstance,
-	int ShowWnd,
-	bool fullscreen)
-
-{
-	if (fullscreen)
-	{
-		HMONITOR hmon = MonitorFromWindow(hwnd,
-			MONITOR_DEFAULTTONEAREST);
-		MONITORINFO mi = { sizeof(mi) };
-		GetMonitorInfo(hmon, &mi);
-
-		Width = mi.rcMonitor.right - mi.rcMonitor.left;
-		Height = mi.rcMonitor.bottom - mi.rcMonitor.top;
-	}
-
-	WNDCLASSEX wc;
-
-	wc.cbSize = sizeof(WNDCLASSEX);
-	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = WndProc;
-	wc.cbClsExtra = NULL;
-	wc.cbWndExtra = NULL;
-	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
-	wc.lpszMenuName = NULL;
-	wc.lpszClassName = WindowName;
-	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-
-	if (!RegisterClassEx(&wc))
-	{
-		MessageBox(NULL, L"Error registering class",
-			L"Error", MB_OK | MB_ICONERROR);
-		return false;
-	}
-
-	hwnd = CreateWindowEx(NULL,
-		WindowName,
-		WindowTitle,
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		Width, Height,
-		NULL,
-		NULL,
-		hInstance,
-		NULL);
-
-	if (!hwnd)
-	{
-		MessageBox(NULL, L"Error creating window",
-			L"Error", MB_OK | MB_ICONERROR);
-		return false;
-	}
-
-	if (fullscreen)
-	{
-		SetWindowLong(hwnd, GWL_STYLE, 0);
-	}
-
-	ShowWindow(hwnd, ShowWnd);
-	UpdateWindow(hwnd);
-
-	return true;
-}
 
 void mainloop() {
 	MSG msg;
@@ -166,7 +97,6 @@ bool InitD3D()
 
     srand(time(NULL));
   
-
 
 	HRESULT hr;
 
@@ -239,8 +169,8 @@ bool InitD3D()
 	// -- Create the Swap Chain (double/tripple buffering) -- //
 
 	DXGI_MODE_DESC backBufferDesc = {}; // this is to describe our display mode
-	backBufferDesc.Width = Width; // buffer width
-	backBufferDesc.Height = Height; // buffer height
+	backBufferDesc.Width = 800; // buffer width
+	backBufferDesc.Height = 600; // buffer height
 	backBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the buffer (rgba 32 bits, 8 bits for each chanel)
 
 														// describe our multi-sampling. We are not multi-sampling, so we set the count to 1 (we need at least one sample of course)
@@ -255,7 +185,7 @@ bool InitD3D()
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // dxgi will discard the buffer (data) after we call present
 	swapChainDesc.OutputWindow = hwnd; // handle to our window
 	swapChainDesc.SampleDesc = sampleDesc; // our multi-sampling description
-	swapChainDesc.Windowed = !FullScreen; // set to true, then if in fullscreen must call SetFullScreenState with true for full screen to get uncapped fps
+	swapChainDesc.Windowed = !false; // set to true, then if in fullscreen must call SetFullScreenState with true for full screen to get uncapped fps
 
 	IDXGISwapChain* tempSwapChain;
 

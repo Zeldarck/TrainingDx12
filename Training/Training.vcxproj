@@ -160,11 +160,13 @@
     <ClCompile Include="MyMesh.cpp" />
     <ClCompile Include="PSO.cpp" />
     <ClCompile Include="PSOFactory.cpp" />
+    <ClCompile Include="RenderEngine.cpp" />
     <ClCompile Include="RootSignature.cpp" />
     <ClCompile Include="RootSignatureFactory.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderFactory.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -174,12 +176,14 @@
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="PSO.h" />
     <ClInclude Include="PSOFactory.h" />
+    <ClInclude Include="RenderEngine.h" />
     <ClInclude Include="RootSignature.h" />
     <ClInclude Include="RootSignatureFactory.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderFactory.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
