@@ -208,10 +208,9 @@ bool RenderEngine::CreateSwapChain() {
 
     DXGI_MODE_DESC backBufferDesc = {}; // this is to describe our display mode
     backBufferDesc.Width = m_window->GetWidth(); // buffer width
-    backBufferDesc.Height = m_window->GetWidth(); // buffer height
+    backBufferDesc.Height = m_window->GetHeight(); // buffer height
     backBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the buffer (rgba 32 bits, 8 bits for each chanel)
 
-                                                        // describe our multi-sampling. We are not multi-sampling, so we set the count to 1 (we need at least one sample of course)
     m_sampleDesc = new DXGI_SAMPLE_DESC();
     m_sampleDesc->Count = 1; // multisample count (no multisampling, so we just put 1, since we still need 1 sample)
 
