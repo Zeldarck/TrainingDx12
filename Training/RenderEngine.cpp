@@ -69,6 +69,13 @@ RenderEngine::~RenderEngine()
     // close the fence event
     CloseHandle(m_fenceEvent);
 
+    // wait for the gpu to finish all frames
+    for (int i = 0; i < FRAME_BUFFER_COUNT; ++i)
+    {
+        m_frameIndex = i;
+        WaitForPreviousFrame();
+    }
+
 
     // get swapchain out of full screen before exiting
     BOOL fs = false;
@@ -85,12 +92,6 @@ RenderEngine::~RenderEngine()
     SAFE_RELEASE(m_commandList);
 
 
-    // wait for the gpu to finish all frames
-    for (int i = 0; i < FRAME_BUFFER_COUNT; ++i)
-    {
-        m_frameIndex = i;
-        WaitForPreviousFrame();
-    }
 
     for (int i = 0; i < FRAME_BUFFER_COUNT; ++i)
     {

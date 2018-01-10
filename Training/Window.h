@@ -12,6 +12,7 @@ private:
     int m_width;
     int m_height;
     bool m_fullScreen;
+    bool m_isOpen;
 public:
     void Update();
     int GetWidth();
@@ -19,6 +20,7 @@ public:
     HWND GetHWND();
     bool IsFullScreen();
     Window(HINSTANCE a_hInstance, int a_nShowCmd, LPCTSTR WindowName = L"WindowName", LPCTSTR WindowTitle = L"WindowTitle", int a_width = 800, int a_height = 600, bool a_fullScreen = false);
+    bool IsOpen();
     void Close();
     ~Window();
 

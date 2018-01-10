@@ -25,8 +25,6 @@
 #include "RootSignatureFactory.h"
 #include "Window.h"
 #include "RenderEngine.h"
-// we will exit the program when this becomes false
-bool Running = true;
 
 
 

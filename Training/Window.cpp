@@ -76,10 +76,15 @@ Window::Window(HINSTANCE a_hInstance, int a_nShowCmd, LPCTSTR WindowName /* = L"
     UpdateWindow(m_hwnd);
 
     SetWindowLongPtrW(m_hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+    m_isOpen = true;
+}
 
+bool Window::IsOpen() {
+    return m_isOpen;
 }
 
 void Window::Close() {
+    m_isOpen = false;
     DestroyWindow(m_hwnd);
 }
 

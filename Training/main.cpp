@@ -44,7 +44,7 @@ void mainloop() {
 	MSG msg;
 	ZeroMemory(&msg, sizeof(MSG));
 
-	while (Running)
+	while (m_window->IsOpen())
 	{
 		// run game code
         m_window->Update();
