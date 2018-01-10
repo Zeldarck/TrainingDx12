@@ -29,10 +29,6 @@ int WINAPI WinMain(HINSTANCE hInstance,    //Main windows function
 	// start the main loop
 	mainloop();
 
-	// we want to wait for the gpu to finish executing the command list before we start releasing everything
-	//WaitForPreviousFrame();
-
-
 	// clean up everything
 	Cleanup();
 
@@ -48,9 +44,9 @@ void mainloop() {
 	{
 		// run game code
         m_window->Update();
+		UpdateLogic();
         RenderEngine::GetInstance()->PrepareToRender();
-		Update(); // update the game logic
-        UpdatePipeline();
+        UpdateRender();
         RenderEngine::GetInstance()->Render();
 
 		
@@ -61,27 +57,30 @@ bool InitD3D()
 {
 
     RenderEngine* renderEngine = RenderEngine::GetInstance(m_window);
-    bool res = renderEngine->InitD3D();
-    if (!res) {
-        int k = 0;
-    }
 
-/// faire tout ça à la prochaine frame
+    renderEngine->InitD3D();
+
+
+    //Create Basis Objects 
     m_cubeMesh.SetObj("Assets/soldier.obj");
     m_TorusMesh.SetObj("Assets/cube.obj"); 
 
 
+    //Push them to GPU
     renderEngine->PrepareToRender();
     m_cubeMesh.PushOnGPU(renderEngine->GetDevice(), renderEngine->GetCommandList());
     m_TorusMesh.PushOnGPU(renderEngine->GetDevice(), renderEngine->GetCommandList());
-/////
-
-
-
     m_gameObject1.CreateCBUploadHeap(renderEngine->GetDevice(), renderEngine->GetFrameBufferCount());
     m_gameObject2.CreateCBUploadHeap(renderEngine->GetDevice(), renderEngine->GetFrameBufferCount());
-
     renderEngine->Render();
+
+
+    m_gameObject1.Scale(0.05f, 0.05f, 0.05f);
+    m_gameObject2.SetParent(&m_gameObject1);
+    m_gameObject1.SetParent(&m_scene);
+
+    m_gameObject1.SetMesh(&m_cubeMesh);
+    m_gameObject2.SetMesh(&m_TorusMesh);
 
     // build projection and view matrix
     DirectX::XMMATRIX tmpMat;
@@ -90,13 +89,6 @@ bool InitD3D()
     m_camera.SetIsOrthographic(false);
     m_camera.SetFOV(45.0f);
     m_camera.SetView(m_window->GetWidth(), m_window->GetHeight());
-
-    m_gameObject1.Scale(0.05f, 0.05f, 0.05f);
-    m_gameObject2.SetParent(&m_gameObject1);
-    m_gameObject1.SetParent(&m_scene);
-
-    m_gameObject1.SetMesh(&m_cubeMesh);
-    m_gameObject2.SetMesh(&m_TorusMesh);
 
     return true;
 }
@@ -151,9 +143,13 @@ void UpdateCamera() {
         m_camera.Rotate(1.0f, 0.0f, 0.0f, -speed);
     }
 
+    m_camera.Rotate(0.0f, 1.0f, 0.0f, -m_window->GetRotX()/1000.0f);
+    m_camera.Rotate(1.0f, 0.0f, 0.0f, -m_window->GetRotY()/1000.0f);
+
+
  }
 
-void Update()
+void UpdateLogic()
 {
 
     UpdateCamera();
@@ -168,33 +164,9 @@ void Update()
     m_gameObject2.Rotate(1.0f, 0.0f, 0.0f, 0.0003f);   */
 }
 
-void UpdatePipeline()
+void UpdateRender()
 {
-
-
     m_scene.Draw( RenderEngine::GetInstance()->GetCommandList(), RenderEngine::GetInstance()->GetFrameIndex(), &m_camera);
-
-
-    /*  //Not good way? Don't use device in that?
-    if (GetAsyncKeyState(VK_LBUTTON) && !add_stickMan) {
-        
-        PSOFactory::GetInstance()->CreatePSO(PSO_FLAGS_FULLCOLOR);
-
-        MyMesh* sphere = new MyMesh();
-        GameObject* go = new GameObject(DirectX::XMFLOAT4(-1.0f,0.0f,0.0f,0.0f));
-        go->SetParent(&m_gameObject2);
-        sphere->SetObj("sphere.obj");
-
-        sphere->PushOnGPU(device, commandList);
-        go->SetMesh(sphere);
-        go->CreateCBUploadHeap(device, frameBufferCount);
-        add_stickMan = true;
-    }*/
-
-    
-	// transition the "frameIndex" render target from the render target state to the present state. If the debug layer is enabled, you will receive a
-	// warning if present is called on the render target when it's not in the present state
-
 }
 
 

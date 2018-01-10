@@ -32,8 +32,8 @@ private:
     ID3D12Resource* m_renderTargets[FRAME_BUFFER_COUNT]; // number of render targets equal to buffer count
     int m_rtvDescriptorSize; // size of the rtv descriptor on the device (all front and back buffers will be the same size)
                            // function declarations
-    D3D12_VIEWPORT viewport; // area that output from rasterizer will be stretched to.
-    D3D12_RECT scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
+    D3D12_VIEWPORT m_viewport; // area that output from rasterizer will be stretched to.
+    D3D12_RECT m_scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
 
 
     bool CreateDevice();

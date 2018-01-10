@@ -13,10 +13,19 @@ private:
     int m_height;
     bool m_fullScreen;
     bool m_isOpen;
+
+    int m_lastX = -1;
+    int m_lastY = -1;
+    int m_rotX = 0;
+    int m_rotY = 0;
+
+
 public:
     void Update();
     int GetWidth();
     int GetHeight();
+    int GetRotX();
+    int GetRotY();
     HWND GetHWND();
     bool IsFullScreen();
     Window(HINSTANCE a_hInstance, int a_nShowCmd, LPCTSTR WindowName = L"WindowName", LPCTSTR WindowTitle = L"WindowTitle", int a_width = 800, int a_height = 600, bool a_fullScreen = false);

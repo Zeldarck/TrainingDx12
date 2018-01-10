@@ -8,6 +8,7 @@ https://gist.github.com/noonat/1131091 <br />
 https://github.com/libgdx/libgdx/blob/master/tests/gdx-tests-android/assets/data/sphere.obj <br />
 https://free3d.com/3d-model/low-poly-rigs-soldier-91049.html <br />
 https://free3d.com/3d-model/spider-animated-low-poly-and-game-ready-87147.html <br />
+https://www.iconfinder.com/icons/28088/blue_cube_icon#size=16 <br />
 
 Code : <br />
 https://github.com/Microsoft/DirectX-Graphics-Samples <br />

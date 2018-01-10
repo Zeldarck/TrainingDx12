@@ -391,67 +391,60 @@ bool RenderEngine::InitD3D()
 {
     HRESULT hr;
     if (!m_window) {
+        ErrorMessage("Window not setted");
         return false;
     }
 
     if (!CreateDevice()) {
+        ErrorMessage("Device failed to created");
         return false;
     }
 
     if (!CreateCommandQueue()) {
+        ErrorMessage("CommandQueue failed to created");
         return false;
     }
 
     if (!CreateSwapChain()) {
+        ErrorMessage("SwapChain failed to created");
         return false;
     }
 
     if (!CreateRenderTargetViews()) {
+        ErrorMessage("RenderTargetView failed to created");
         return false;
     }
 
     if (!CreateCommandList()) {
+        ErrorMessage("CommandList failed to created");
         return false;
     }
 
     if (!CreateFences()) {
+        ErrorMessage("Fence failed to created");
         return false;
     }
 
     if (!CreateDepthStencil()) {
+        ErrorMessage("DepthStencil failed to created");
         return false;
     }
 
-    m_commandList->Close();
-    ID3D12CommandList* ppCommandLists[] = { m_commandList };
-    m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
-    // increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
-    m_fenceValue[m_frameIndex]++;
-    hr = m_commandQueue->Signal(m_fence[m_frameIndex], m_fenceValue[m_frameIndex]);
-    if (FAILED(hr))
-    {
-        return false;
-    }
-
-
+    Render();
 
     // Fill out the Viewport
-    viewport.TopLeftX = 0;
-    viewport.TopLeftY = 0;
-    viewport.Width = m_window->GetWidth();
-    viewport.Height = m_window->GetHeight();
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
+    m_viewport.TopLeftX = 0;
+    m_viewport.TopLeftY = 0;
+    m_viewport.Width = m_window->GetWidth();
+    m_viewport.Height = m_window->GetHeight();
+    m_viewport.MinDepth = 0.0f;
+    m_viewport.MaxDepth = 1.0f;
 
     // Fill out a scissor rect
-    scissorRect.left = 0;
-    scissorRect.top = 0;
-    scissorRect.right = m_window->GetWidth();
-    scissorRect.bottom = m_window->GetHeight();
-
-
-
+    m_scissorRect.left = 0;
+    m_scissorRect.top = 0;
+    m_scissorRect.right = m_window->GetWidth();
+    m_scissorRect.bottom = m_window->GetHeight();
 
 }
 
@@ -467,21 +460,21 @@ void RenderEngine::PrepareToRender() {
     // We have to wait for the gpu to finish with the command allocator before we reset it
     WaitForPreviousFrame();
 
-    // we can only reset an allocator once the gpu is done with it
-    // resetting an allocator frees the memory that the command list was stored in
+    // free the memory of the command allocator
     hr = m_commandAllocator[m_frameIndex]->Reset();
     if (FAILED(hr))
     {
+        ErrorMessage("CommandAllocator Failed to reset");
         return;
     }
 
+    // free the memory of the command list without put pso
     hr = m_commandList->Reset(m_commandAllocator[m_frameIndex], nullptr);
     if (FAILED(hr))
     {
+        ErrorMessage("CommandList Failed to reset");
         return;
     }
-
-    // here we start recording commands into the commandList (which all the commands will be stored in the commandAllocator)
 
     // transition the "frameIndex" render target from the present state to the render target state so the command list draws to it starting from here
     m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
@@ -497,8 +490,8 @@ void RenderEngine::PrepareToRender() {
     m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     m_commandList->ClearDepthStencilView(m_dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-    m_commandList->RSSetViewports(1, &viewport); // set the viewports
-    m_commandList->RSSetScissorRects(1, &scissorRect); // set the scissor rects
+    m_commandList->RSSetViewports(1, &m_viewport); // set the viewports
+    m_commandList->RSSetScissorRects(1, &m_scissorRect); // set the scissor rects
     m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
 
 }
@@ -513,6 +506,7 @@ void RenderEngine::Render()
     hr = m_commandList->Close();
     if (FAILED(hr))
     {
+        ErrorMessage("CommandList Failed to close");
         return;
     }
 
@@ -522,12 +516,10 @@ void RenderEngine::Render()
     // execute the array of command lists
     m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-    // this command goes in at the end of our command queue. we will know when our command queue 
-    // has finished because the fence value will be set to "fenceValue" from the GPU since the command
-    // queue is being executed on the GPU
     hr = m_commandQueue->Signal(m_fence[m_frameIndex], m_fenceValue[m_frameIndex]);
     if (FAILED(hr))
     {
+        ErrorMessage("CommandQueue signal failed");
         return;
     }
 
@@ -535,6 +527,7 @@ void RenderEngine::Render()
     hr = m_swapChain->Present(1, 0);
     if (FAILED(hr))
     {
+        ErrorMessage("Present Failed");
         return;
     }
 }

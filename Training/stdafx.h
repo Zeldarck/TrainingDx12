@@ -31,23 +31,13 @@
 // main application loop
 void mainloop();
 
-
-
-
-
-
-
-
 bool InitD3D(); // initializes direct3d 12
 
-void Update(); // update the game logic
+void UpdateLogic(); // update the game logic
 
-void UpdatePipeline(); // update the direct3d pipeline (update command lists)
-
+void UpdateRender(); // update the direct3d pipeline (update command lists)
 
 void Cleanup(); // release com ojects and clean up memory
-
-
 
 Camera m_camera = Camera(DirectX::XMFLOAT4(0.0f, 0.0f, -4.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f));
 
@@ -62,7 +52,5 @@ MyMesh m_TorusMesh;
 float speed = 0.1f;
 
 bool add_stickMan = false;
-
-
 
 Window * m_window = nullptr;

@@ -1,7 +1,7 @@
 #include "Window.h"
-
-
-
+#include <Windowsx.h>
+#include <windows.h>
+#include "resource.h"
 
 int Window::GetWidth()
 {
@@ -11,6 +11,20 @@ int Window::GetWidth()
 int Window::GetHeight()
 {
     return m_height;
+}
+
+int Window::GetRotX()
+{
+    int tmp = m_rotX;
+    m_rotX = 0;
+    return tmp;
+}
+
+int Window::GetRotY()
+{
+    int tmp = m_rotY;
+    m_rotY = 0;
+    return tmp;
 }
 
 Window::Window(HINSTANCE a_hInstance, int a_nShowCmd, LPCTSTR WindowName /* = L"WindowName" */, LPCTSTR WindowTitle /* = L"WindowTitle" */, int a_width /* =800 */, int a_height /* = 600*/, bool a_fullScreen /*= false*/)
@@ -25,7 +39,11 @@ Window::Window(HINSTANCE a_hInstance, int a_nShowCmd, LPCTSTR WindowName /* = L"
 
         a_width = mi.rcMonitor.right - mi.rcMonitor.left;
         a_height = mi.rcMonitor.bottom - mi.rcMonitor.top;
+        m_width = a_width;
+        m_height = a_height;
     }
+
+    HICON ico = LoadIcon(a_hInstance, MAKEINTRESOURCEW(IDI_ICON1));
 
     WNDCLASSEX wc;
 
@@ -35,12 +53,12 @@ Window::Window(HINSTANCE a_hInstance, int a_nShowCmd, LPCTSTR WindowName /* = L"
     wc.cbClsExtra = NULL;
     wc.cbWndExtra = NULL;
     wc.hInstance = a_hInstance;
-    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hIcon = ico;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
     wc.lpszMenuName = NULL;
     wc.lpszClassName = WindowName;
-    wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hIconSm = ico;
 
     if (!RegisterClassEx(&wc))
     {
@@ -110,6 +128,21 @@ LRESULT CALLBACK Window::WndProc(HWND a_hwnd, UINT a_msg, WPARAM a_wParam, LPARA
 
             PostQuitMessage(0);
             return 0;
+        case WM_MOUSEMOVE:
+            int xPos = GET_X_LPARAM(a_lParam);
+            int yPos = GET_Y_LPARAM(a_lParam);
+            if (window->m_lastX != -1) {
+                window->m_rotX = xPos - window->m_lastX;
+            }
+            if (window->m_lastY != -1) {
+                window->m_rotY = yPos - window->m_lastY;
+            }
+            window->m_lastX = xPos;
+            window->m_lastY = yPos;
+            //RECT rect;
+            //GetWindowRect(a_hwnd, &rect);
+            //SetCursorPos((rect.left + rect.right)/2, (rect.bottom + rect.top) / 2);
+            break;
     }
 
     return DefWindowProc(a_hwnd,
