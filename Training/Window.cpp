@@ -79,14 +79,11 @@ Window::Window(HINSTANCE a_hInstance, int a_nShowCmd, LPCTSTR WindowName /* = L"
 
 }
 
-void Window::Close()
-{
+void Window::Close() {
     DestroyWindow(m_hwnd);
 }
 
-LRESULT CALLBACK Window::WndProc(HWND a_hwnd, UINT a_msg, WPARAM a_wParam, LPARAM a_lParam)
-
-{
+LRESULT CALLBACK Window::WndProc(HWND a_hwnd, UINT a_msg, WPARAM a_wParam, LPARAM a_lParam) {
     Window* window = reinterpret_cast<Window*>(GetWindowLongPtr(a_hwnd, GWLP_USERDATA));
 
     switch (a_msg)
@@ -115,6 +112,23 @@ LRESULT CALLBACK Window::WndProc(HWND a_hwnd, UINT a_msg, WPARAM a_wParam, LPARA
         a_wParam,
         a_lParam);
 }
+
+
+void Window::Update()
+{
+    MSG msg;
+    ZeroMemory(&msg, sizeof(MSG));
+
+    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+    {
+        if (msg.message == WM_QUIT)
+            break;
+
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+}
+
 
 HWND Window::GetHWND() {
     return m_hwnd;

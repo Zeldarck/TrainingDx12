@@ -2,6 +2,7 @@
 #include "d3dx12.h"
 #include "Window.h"
 #include <string>
+#include <dxgi1_4.h>
 #define FRAME_BUFFER_COUNT 3
 
 class RenderEngine
@@ -31,6 +32,8 @@ private:
     ID3D12Resource* m_renderTargets[FRAME_BUFFER_COUNT]; // number of render targets equal to buffer count
     int m_rtvDescriptorSize; // size of the rtv descriptor on the device (all front and back buffers will be the same size)
                            // function declarations
+    D3D12_VIEWPORT viewport; // area that output from rasterizer will be stretched to.
+    D3D12_RECT scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
 
 
     bool CreateDevice();
@@ -53,12 +56,16 @@ public:
 
     bool WaitForPreviousFrame();
     DXGI_SAMPLE_DESC * GetSampleDesc();
-
-
+    ID3D12Device* GetDevice();
+    int GetFrameIndex();
+    ID3D12GraphicsCommandList* GetCommandList();
+    int GetFrameBufferCount();
 
     bool InitD3D();
 
     void ErrorMessage(std::string a_msg);
+
+    void PrepareToRender();
 
     void Render();
 

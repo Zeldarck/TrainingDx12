@@ -46,15 +46,9 @@ void Update(); // update the game logic
 
 void UpdatePipeline(); // update the direct3d pipeline (update command lists)
 
-void Render(); // execute the command list
 
 void Cleanup(); // release com ojects and clean up memory
 
-
-
-D3D12_VIEWPORT viewport; // area that output from rasterizer will be stretched to.
-
-D3D12_RECT scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
 
 
 Camera m_camera = Camera(DirectX::XMFLOAT4(0.0f, 0.0f, -4.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f));

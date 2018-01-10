@@ -13,6 +13,7 @@ private:
     int m_height;
     bool m_fullScreen;
 public:
+    void Update();
     int GetWidth();
     int GetHeight();
     HWND GetHWND();

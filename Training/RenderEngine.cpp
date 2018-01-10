@@ -43,8 +43,32 @@ DXGI_SAMPLE_DESC* RenderEngine::GetSampleDesc() {
     return m_sampleDesc;
 }
 
+ID3D12Device * RenderEngine::GetDevice()
+{
+    return m_device;
+}
+
+int RenderEngine::GetFrameIndex()
+{
+    return m_frameIndex;
+}
+
+ID3D12GraphicsCommandList * RenderEngine::GetCommandList()
+{
+    return m_commandList;
+}
+
+int RenderEngine::GetFrameBufferCount()
+{
+    return FRAME_BUFFER_COUNT;
+}
+
 RenderEngine::~RenderEngine()
 {
+
+    // close the fence event
+    CloseHandle(m_fenceEvent);
+
 
     // get swapchain out of full screen before exiting
     BOOL fs = false;
@@ -174,6 +198,7 @@ bool RenderEngine::CreateCommandQueue() {
     {
         return false;
     }
+    return true;
 
 }
 
@@ -187,7 +212,7 @@ bool RenderEngine::CreateSwapChain() {
     backBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the buffer (rgba 32 bits, 8 bits for each chanel)
 
                                                         // describe our multi-sampling. We are not multi-sampling, so we set the count to 1 (we need at least one sample of course)
-    *m_sampleDesc = {};
+    m_sampleDesc = new DXGI_SAMPLE_DESC();
     m_sampleDesc->Count = 1; // multisample count (no multisampling, so we just put 1, since we still need 1 sample)
 
                           // Describe and create the swap chain.
@@ -397,6 +422,36 @@ bool RenderEngine::InitD3D()
         return false;
     }
 
+    m_commandList->Close();
+    ID3D12CommandList* ppCommandLists[] = { m_commandList };
+    m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+    // increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
+    m_fenceValue[m_frameIndex]++;
+    hr = m_commandQueue->Signal(m_fence[m_frameIndex], m_fenceValue[m_frameIndex]);
+    if (FAILED(hr))
+    {
+        return false;
+    }
+
+
+
+    // Fill out the Viewport
+    viewport.TopLeftX = 0;
+    viewport.TopLeftY = 0;
+    viewport.Width = m_window->GetWidth();
+    viewport.Height = m_window->GetHeight();
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+
+    // Fill out a scissor rect
+    scissorRect.left = 0;
+    scissorRect.top = 0;
+    scissorRect.right = m_window->GetWidth();
+    scissorRect.bottom = m_window->GetHeight();
+
+
+
 
 }
 
@@ -406,13 +461,62 @@ void RenderEngine::ErrorMessage(std::string a_msg) {
 }
 
 
+void RenderEngine::PrepareToRender() {
+    HRESULT hr;
+
+    // We have to wait for the gpu to finish with the command allocator before we reset it
+    WaitForPreviousFrame();
+
+    // we can only reset an allocator once the gpu is done with it
+    // resetting an allocator frees the memory that the command list was stored in
+    hr = m_commandAllocator[m_frameIndex]->Reset();
+    if (FAILED(hr))
+    {
+        return;
+    }
+
+    hr = m_commandList->Reset(m_commandAllocator[m_frameIndex], nullptr);
+    if (FAILED(hr))
+    {
+        return;
+    }
+
+    // here we start recording commands into the commandList (which all the commands will be stored in the commandAllocator)
+
+    // transition the "frameIndex" render target from the present state to the render target state so the command list draws to it starting from here
+    m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+    // here we again get the handle to our current render target view so we can set it as the render target in the output merger stage of the pipeline
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
+    CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+    // set the render target for the output merger stage (the output of the pipeline)
+    m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+    // Clear the render target by using the ClearRenderTargetView command
+    const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
+    m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+    m_commandList->ClearDepthStencilView(m_dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+    m_commandList->RSSetViewports(1, &viewport); // set the viewports
+    m_commandList->RSSetScissorRects(1, &scissorRect); // set the scissor rects
+    m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
+
+}
+
 void RenderEngine::Render()
 {
     HRESULT hr;
 
-    UpdatePipeline(); // update the pipeline by sending commands to the commandqueue
 
-                      // create an array of command lists (only one command list here)
+    m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+
+    hr = m_commandList->Close();
+    if (FAILED(hr))
+    {
+        return;
+    }
+
+                      
     ID3D12CommandList* ppCommandLists[] = { m_commandList };
 
     // execute the array of command lists
